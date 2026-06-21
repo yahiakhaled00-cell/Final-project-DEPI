@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider } from "./context/AppContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import Dashboard from "./pages/Dashboard";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import Analysis from "./pages/Analysis";
@@ -14,7 +15,9 @@ import Profile from "./pages/Profile";
 
 function Layout({ children }) {
   return (
-    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
+    <div
+      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+    >
       <Navbar />
       <main style={{ flex: 1 }}>{children}</main>
       <Footer />
@@ -38,6 +41,7 @@ function App() {
             <Route path="/preview" element={<Preview />} />
             <Route path="/github" element={<GitHub />} />
             <Route path="/profile" element={<Profile />} />
+            <Route path="/dashboard" element={<Dashboard />} />
           </Routes>
         </Layout>
       </BrowserRouter>
