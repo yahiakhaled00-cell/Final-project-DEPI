@@ -2,288 +2,253 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
-const sections = ["Template", "About", "Skills", "Projects", "Contact", "Theme"];
-
 const templates = [
-  { id: "minimal", name: "Minimal", desc: "Editorial · serif · airy whitespace" },
-  { id: "modern", name: "Modern", desc: "Glassmorphism · gradients · motion" },
-  { id: "dark", name: "Developer Dark", desc: "Terminal · monospace · neon green" },
+  { id: "minimal", name: "Minimal", tagline: "Editorial · serif · airy whitespace" },
+  { id: "modern", name: "Modern", tagline: "Glassmorphism · gradients · motion" },
+  { id: "dark", name: "Developer Dark", tagline: "Terminal · monospace · neon green" },
 ];
+
+const sections = [
+  { id: "template", label: "Template", icon: "🖼" },
+  { id: "about", label: "About", icon: "👤" },
+  { id: "skills", label: "Skills", icon: "🔧" },
+  { id: "projects", label: "Projects", icon: "📁" },
+  { id: "contact", label: "Contact", icon: "✉️" },
+  { id: "theme", label: "Theme", icon: "🎨" },
+];
+
+const accents = [
+  { id: "violet", color: "#7c3aed" },
+  { id: "cyan", color: "#06b6d4" },
+  { id: "emerald", color: "#10b981" },
+  { id: "amber", color: "#f59e0b" },
+  { id: "rose", color: "#f43f5e" },
+];
+
+const inputStyle = {
+  borderRadius: 8,
+  backgroundColor: "#0f172a",
+  color: "white",
+  border: "1px solid #333",
+  width: "100%",
+  padding: "8px 12px",
+};
 
 export default function Builder() {
   const navigate = useNavigate();
-  const { portfolioData, setPortfolioData } = useApp();
+  const { profile, setProfile } = useApp();
+  const [active, setActive] = useState("template");
 
-  const [activeSection, setActiveSection] = useState("Template");
+  // كل حاجة بتتقرا وتتكتب على profile مباشرة — مفيش auto-fill من GitHub خالص
+  const portfolio = {
+    name: profile.name || "",
+    title: profile.title || "",
+    bio: profile.bio || "",
+    skills: profile.skills
+      ? profile.skills.split(",").map(s => s.trim()).filter(Boolean)
+      : [],
+    email: profile.email || "",
+    github: profile.github || "",
+    avatar: profile.avatar || null,
+    template: profile.template || "minimal",
+    accent: profile.accent || "violet",
+    projects: profile.builderProjects || [],
+  };
 
-  // shortcut helpers
-  const about = portfolioData.about;
-  const skills = portfolioData.skills.length ? portfolioData.skills : [""];
-  const projects = portfolioData.projects.length ? portfolioData.projects : [{ name: "", description: "", link: "", tech: "" }];
-  const contact = portfolioData.contact;
-  const theme = portfolioData.theme;
-  const selectedTemplate = portfolioData.template;
+  const update = (key, value) => setProfile({ ...profile, [key]: value });
 
-  const update = (key, value) => setPortfolioData(prev => ({ ...prev, [key]: value }));
+  const updateProject = (i, field, value) => {
+    const next = [...portfolio.projects];
+    next[i] = { ...next[i], [field]: value };
+    update("builderProjects", next);
+  };
 
-  const addSkill = () => update("skills", [...skills, ""]);
-  const updateSkill = (i, val) => update("skills", skills.map((s, idx) => (idx === i ? val : s)));
-  const removeSkill = (i) => update("skills", skills.filter((_, idx) => idx !== i));
+  const addProject = () => update("builderProjects", [...portfolio.projects, { name: "", description: "" }]);
+  const removeProject = (i) => update("builderProjects", portfolio.projects.filter((_, idx) => idx !== i));
 
-  const addProject = () => update("projects", [...projects, { name: "", description: "", link: "", tech: "" }]);
-  const updateProject = (i, field, val) =>
-    update("projects", projects.map((p, idx) => (idx === i ? { ...p, [field]: val } : p)));
-  const removeProject = (i) => update("projects", projects.filter((_, idx) => idx !== i));
-
-  // image upload handler (base64 in state)
-  const handleAboutImageUpload = (e) => {
+  const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
     const reader = new FileReader();
-    reader.onloadend = () => {
-      update("about", { ...about, image: reader.result });
-    };
+    reader.onloadend = () => update("avatar", reader.result);
     reader.readAsDataURL(file);
   };
 
-  const removeAboutImage = () => update("about", { ...about, image: "" });
+  const removeAvatar = () => update("avatar", null);
 
   return (
-    <div className="d-flex" style={{ minHeight: "80vh" }}>
-
-      {/* Sidebar */}
-      <div className="d-flex flex-column gap-1 py-4 flex-shrink-0"
-        style={{ width: "200px", background: "#1a1a2e" }}>
-        {sections.map((s) => (
-          <button key={s} onClick={() => setActiveSection(s)}
-            className="btn border-0 text-start px-4 py-2"
-            style={{
-              background: activeSection === s ? "#6c63ff22" : "transparent",
-              color: activeSection === s ? "#6c63ff" : "#aaa",
-              fontWeight: activeSection === s ? 600 : 400,
-              borderLeft: activeSection === s ? "3px solid #6c63ff" : "3px solid transparent",
-              borderRadius: 0,
-              transition: "all 0.2s",
-              fontSize: "14px"
-            }}>
-            {s}
-          </button>
-        ))}
-
-        {/* Open Preview Button */}
-        <div className="mt-auto px-3 pt-4">
-          <button onClick={() => navigate("/preview")}
-            className="btn w-100 fw-semibold text-white"
-            style={{ background: "#6c63ff", fontSize: "13px" }}>
-            Open Preview ↗
-          </button>
+    <div className="container py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h4 className="fw-bold mb-1">Portfolio builder</h4>
+          <p className="text-muted small mb-0">Edits sync instantly to your live preview.</p>
         </div>
+        <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate("/preview")}>
+          👁 Open preview
+        </button>
       </div>
 
-      {/* Content */}
-      <div className="flex-grow-1 p-4 overflow-auto" style={{ background: "#f8f9ff" }}>
-
-        {/* Template */}
-        {activeSection === "Template" && (
-          <div>
-            <h2 className="fw-bold mb-1" style={{ fontSize: "22px", color: "#1a1a2e" }}>Pick a template</h2>
-            <p className="text-secondary mb-4">Changes apply instantly to your live preview.</p>
-            <div className="d-flex flex-wrap gap-3">
-              {templates.map((t) => (
-                <div key={t.id} onClick={() => update("template", t.id)}
-                  className="p-3 rounded-3 bg-white"
-                  style={{
-                    width: "180px", cursor: "pointer",
-                    border: selectedTemplate === t.id ? "2px solid #6c63ff" : "2px solid #ddd",
-                    boxShadow: selectedTemplate === t.id ? "0 0 0 4px #6c63ff22" : "none",
-                    transition: "all 0.2s"
-                  }}>
-                  <div className="rounded-3 mb-3 d-flex align-items-center justify-content-center fw-semibold"
-                    style={{
-                      height: "100px", fontSize: "12px",
-                      background: t.id === "minimal" ? "#f5f5f5" : t.id === "modern" ? "linear-gradient(135deg,#0f0c29,#302b63)" : "#0d1117",
-                      color: t.id === "minimal" ? "#333" : "#fff",
-                    }}>
-                    {t.id === "dark"
-                      ? <span style={{ color: "#39ff14", fontFamily: "monospace" }}>{"$ npm start"}</span>
-                      : "Your Name"}
-                  </div>
-                  <div className="fw-semibold" style={{ fontSize: "14px" }}>{t.name}</div>
-                  <div className="text-secondary mt-1" style={{ fontSize: "11px" }}>{t.desc}</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* About */}
-        {activeSection === "About" && (
-          <div>
-            <h2 className="fw-bold mb-3" style={{ fontSize: "22px", color: "#1a1a2e" }}>About You</h2>
-            <div className="bg-white rounded-3 p-4 shadow-sm">
-              <label className="form-label fw-semibold text-secondary small">Full Name</label>
-              <input className="form-control mb-3" placeholder="e.g. Ahmed Mohamed"
-                value={about.name} onChange={(e) => update("about", { ...about, name: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">Title / Role</label>
-              <input className="form-control mb-3" placeholder="e.g. Full Stack Developer"
-                value={about.title} onChange={(e) => update("about", { ...about, title: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">Bio</label>
-              <textarea className="form-control mb-3" rows={4} placeholder="Write a short bio about yourself..."
-                value={about.bio} onChange={(e) => update("about", { ...about, bio: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">Profile Photo</label>
-              <input type="file" accept="image/*" className="form-control mb-2"
-                onChange={handleAboutImageUpload} />
-              {about.image && (
-                <div className="d-flex align-items-center gap-3 mt-2">
-                  <img src={about.image} alt="Profile preview"
-                    className="rounded-3"
-                    style={{ width: "80px", height: "80px", objectFit: "cover", border: "1px solid #ddd" }} />
-                  <button onClick={removeAboutImage}
-                    className="btn btn-sm"
-                    style={{ background: "#ff4d4d11", color: "#ff4d4d", border: "1px solid #ff4d4d44" }}>
-                    ✕ Remove
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Skills */}
-        {activeSection === "Skills" && (
-          <div>
-            <h2 className="fw-bold mb-3" style={{ fontSize: "22px", color: "#1a1a2e" }}>Skills</h2>
-            <div className="bg-white rounded-3 p-4 shadow-sm">
-              {skills.map((skill, i) => (
-                <div key={i} className="d-flex gap-2 mb-2">
-                  <input className="form-control" placeholder={`Skill ${i + 1} (e.g. React)`}
-                    value={skill} onChange={(e) => updateSkill(i, e.target.value)} />
-                  <button onClick={() => removeSkill(i)}
-                    className="btn btn-sm"
-                    style={{ background: "#ff4d4d11", color: "#ff4d4d", border: "1px solid #ff4d4d44" }}>
-                    ✕
-                  </button>
-                </div>
-              ))}
-              <button onClick={addSkill} className="btn mt-2 text-white fw-semibold"
-                style={{ background: "#6c63ff" }}>
-                + Add Skill
+      <div className="row g-3">
+        {/* Sidebar */}
+        <div className="col-12 col-lg-auto">
+          <div className="card p-2" style={{ borderRadius: 16, backgroundColor: "#1a1a2e", minWidth: 200 }}>
+            {sections.map(s => (
+              <button
+                key={s.id}
+                onClick={() => setActive(s.id)}
+                className="btn btn-sm w-100 text-start mb-1 d-flex align-items-center gap-2"
+                style={{
+                  backgroundColor: active === s.id ? "#7c3aed" : "transparent",
+                  color: active === s.id ? "white" : "#94a3b8",
+                  borderRadius: 10,
+                }}
+              >
+                <span>{s.icon}</span> {s.label}
               </button>
-            </div>
+            ))}
           </div>
-        )}
+        </div>
 
-        {/* Projects */}
-        {activeSection === "Projects" && (
-          <div>
-            <h2 className="fw-bold mb-3" style={{ fontSize: "22px", color: "#1a1a2e" }}>Projects</h2>
-            {projects.map((p, i) => (
-              <div key={i} className="bg-white rounded-3 p-4 shadow-sm mb-3">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <span className="fw-semibold" style={{ color: "#6c63ff" }}>Project {i + 1}</span>
-                  <button onClick={() => removeProject(i)}
-                    className="btn btn-sm"
-                    style={{ background: "#ff4d4d11", color: "#ff4d4d", border: "1px solid #ff4d4d44" }}>
-                    ✕ Remove
-                  </button>
+        {/* Content */}
+        <div className="col">
+          <div className="card p-4" style={{ borderRadius: 16, backgroundColor: "#1a1a2e", color: "white", minHeight: 400 }}>
+
+            {active === "template" && (
+              <div>
+                <p className="text-muted small mb-3">Pick a template — changes apply instantly to your live preview.</p>
+                <div className="row g-3">
+                  {templates.map(t => (
+                    <div className="col-12 col-md-4" key={t.id}>
+                      <div onClick={() => update("template", t.id)} style={{ borderRadius: 12, border: `2px solid ${portfolio.template === t.id ? "#7c3aed" : "#333"}`, overflow: "hidden", cursor: "pointer" }}>
+                        <div style={{ height: 140, backgroundColor: t.id === "dark" ? "#0d1117" : t.id === "modern" ? "#0f2027" : "#f8f9fa", display: "flex", alignItems: "center", justifyContent: "center", padding: 16 }}>
+                          {t.id === "minimal" && <div style={{ color: "#333", textAlign: "center" }}><div style={{ fontSize: 16, fontWeight: "bold" }}>{portfolio.name || "Your Name"}</div><div style={{ fontSize: 11, color: "#666" }}>{portfolio.title || "Your Title"}</div></div>}
+                          {t.id === "modern" && <div style={{ color: "white", textAlign: "center" }}><div style={{ fontSize: 16, fontWeight: "bold" }}>{portfolio.name || "Your Name"}</div><div style={{ fontSize: 11, color: "#94a3b8" }}>{portfolio.title || "Your Title"}</div></div>}
+                          {t.id === "dark" && <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: 12 }}><div>$ whoami</div><div>{portfolio.name || "Your Name"}</div><div>$ ls --skills</div><div>{portfolio.skills.slice(0, 3).join(" · ") || "your skills"}</div></div>}
+                        </div>
+                        <div className="p-2" style={{ backgroundColor: "#1a1a2e" }}>
+                          <div className="d-flex justify-content-between align-items-center">
+                            <div><div className="fw-semibold small">{t.name}</div><div style={{ fontSize: 11, color: "#94a3b8" }}>{t.tagline}</div></div>
+                            {portfolio.template === t.id && <span className="badge" style={{ backgroundColor: "#7c3aed" }}>✓</span>}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {active === "about" && (
+              <div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Profile Photo</label>
+                  <div className="d-flex align-items-center gap-3">
+                    <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", backgroundColor: "#7c3aed", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                      {portfolio.avatar
+                        ? <img src={portfolio.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+                        : <span style={{ fontSize: 22, color: "white" }}>{portfolio.name ? portfolio.name[0].toUpperCase() : "?"}</span>}
+                    </div>
+                    <label className="btn btn-sm btn-outline-secondary mb-0" style={{ cursor: "pointer" }}>
+                      Upload image
+                      <input type="file" accept="image/*" hidden onChange={handleImageUpload} />
+                    </label>
+                    {portfolio.avatar && (
+                      <button className="btn btn-sm" style={{ background: "#ff4d4d11", color: "#ff4d4d", border: "1px solid #ff4d4d44" }} onClick={removeAvatar}>
+                        ✕ Remove
+                      </button>
+                    )}
+                  </div>
                 </div>
 
-                <label className="form-label fw-semibold text-secondary small">Project Name</label>
-                <input className="form-control mb-3" placeholder="e.g. Portfolio Website"
-                  value={p.name} onChange={(e) => updateProject(i, "name", e.target.value)} />
-
-                <label className="form-label fw-semibold text-secondary small">Description</label>
-                <textarea className="form-control mb-3" rows={3} placeholder="What does this project do?"
-                  value={p.description} onChange={(e) => updateProject(i, "description", e.target.value)} />
-
-                <label className="form-label fw-semibold text-secondary small">Tech Stack</label>
-                <input className="form-control mb-3" placeholder="e.g. React, Node.js, MongoDB"
-                  value={p.tech} onChange={(e) => updateProject(i, "tech", e.target.value)} />
-
-                <label className="form-label fw-semibold text-secondary small">Project Link</label>
-                <input className="form-control" placeholder="https://github.com/..."
-                  value={p.link} onChange={(e) => updateProject(i, "link", e.target.value)} />
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Name</label>
+                  <input className="form-control" placeholder="e.g. Ahmed Mohamed" style={inputStyle} value={portfolio.name} onChange={e => update("name", e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Title</label>
+                  <input className="form-control" placeholder="e.g. Full Stack Developer" style={inputStyle} value={portfolio.title} onChange={e => update("title", e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Bio</label>
+                  <textarea className="form-control" rows={5} placeholder="Write a short bio about yourself..." style={inputStyle} value={portfolio.bio} onChange={e => update("bio", e.target.value)} />
+                </div>
               </div>
-            ))}
-            <button onClick={addProject} className="btn text-white fw-semibold"
-              style={{ background: "#6c63ff" }}>
-              + Add Project
-            </button>
-          </div>
-        )}
+            )}
 
-        {/* Contact */}
-        {activeSection === "Contact" && (
-          <div>
-            <h2 className="fw-bold mb-3" style={{ fontSize: "22px", color: "#1a1a2e" }}>Contact Info</h2>
-            <div className="bg-white rounded-3 p-4 shadow-sm">
-              <label className="form-label fw-semibold text-secondary small">Email</label>
-              <input className="form-control mb-3" type="email" placeholder="you@example.com"
-                value={contact.email} onChange={(e) => update("contact", { ...contact, email: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">Phone</label>
-              <input className="form-control mb-3" placeholder="+20 1XX XXX XXXX"
-                value={contact.phone} onChange={(e) => update("contact", { ...contact, phone: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">Location</label>
-              <input className="form-control mb-3" placeholder="e.g. Cairo, Egypt"
-                value={contact.location} onChange={(e) => update("contact", { ...contact, location: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">GitHub Username</label>
-              <input className="form-control mb-3" placeholder="e.g. ahmeddev"
-                value={contact.github} onChange={(e) => update("contact", { ...contact, github: e.target.value })} />
-
-              <label className="form-label fw-semibold text-secondary small">LinkedIn URL</label>
-              <input className="form-control" placeholder="https://linkedin.com/in/..."
-                value={contact.linkedin} onChange={(e) => update("contact", { ...contact, linkedin: e.target.value })} />
-            </div>
-          </div>
-        )}
-
-        {/* Theme */}
-        {activeSection === "Theme" && (
-          <div>
-            <h2 className="fw-bold mb-3" style={{ fontSize: "22px", color: "#1a1a2e" }}>Theme Settings</h2>
-            <div className="bg-white rounded-3 p-4 shadow-sm">
-              <label className="form-label fw-semibold text-secondary small">Primary Color</label>
-              <div className="d-flex align-items-center gap-3 mb-3">
-                <input type="color" value={theme.primaryColor}
-                  onChange={(e) => update("theme", { ...theme, primaryColor: e.target.value })}
-                  className="rounded-3 border-0"
-                  style={{ width: "48px", height: "48px", cursor: "pointer" }} />
-                <span className="text-secondary">{theme.primaryColor}</span>
+            {active === "skills" && (
+              <div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Skills (comma separated)</label>
+                  <input className="form-control" placeholder="React, Node.js, Python..." style={inputStyle}
+                    value={portfolio.skills.join(", ")}
+                    onChange={e => update("skills", e.target.value)}
+                  />
+                </div>
+                <div className="d-flex flex-wrap gap-2">
+                  {portfolio.skills.map(s => (
+                    <span key={s} className="badge" style={{ backgroundColor: "#1e293b", color: "#e2e8f0", borderRadius: 8, padding: "6px 12px" }}>{s}</span>
+                  ))}
+                </div>
               </div>
+            )}
 
-              <label className="form-label fw-semibold text-secondary small">Font Style</label>
-              <select className="form-select mb-3" value={theme.fontStyle}
-                onChange={(e) => update("theme", { ...theme, fontStyle: e.target.value })}>
-                <option value="sans">Sans-serif (Modern)</option>
-                <option value="serif">Serif (Editorial)</option>
-                <option value="mono">Monospace (Developer)</option>
-              </select>
-
-              <label className="form-label fw-semibold text-secondary small">Mode</label>
-              <div className="d-flex gap-3">
-                {["Light", "Dark"].map((m) => (
-                  <button key={m} onClick={() => update("theme", { ...theme, darkMode: m === "Dark" })}
-                    className="btn px-4 py-2 fw-medium"
-                    style={{
-                      border: "2px solid",
-                      borderColor: (theme.darkMode ? "Dark" : "Light") === m ? "#6c63ff" : "#ddd",
-                      background: (theme.darkMode ? "Dark" : "Light") === m ? "#6c63ff11" : "#fff",
-                      color: (theme.darkMode ? "Dark" : "Light") === m ? "#6c63ff" : "#666",
-                    }}>
-                    {m}
-                  </button>
+            {active === "projects" && (
+              <div>
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <span className="small text-muted">Your projects</span>
+                  <button className="btn btn-sm btn-outline-secondary" onClick={addProject}>+ Add Project</button>
+                </div>
+                {portfolio.projects.length === 0 && (
+                  <p className="text-muted small">No projects yet. Click "+ Add Project" to add one.</p>
+                )}
+                {portfolio.projects.map((p, i) => (
+                  <div key={i} className="p-3 mb-3" style={{ border: "1px solid #333", borderRadius: 12 }}>
+                    <div className="mb-2">
+                      <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Project Name</label>
+                      <input className="form-control" placeholder="e.g. Portfolio Website" style={inputStyle} value={p.name}
+                        onChange={e => updateProject(i, "name", e.target.value)} />
+                    </div>
+                    <div className="mb-2">
+                      <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Description</label>
+                      <textarea className="form-control" rows={2} placeholder="What does this project do?" style={inputStyle} value={p.description}
+                        onChange={e => updateProject(i, "description", e.target.value)} />
+                    </div>
+                    <div className="text-end">
+                      <button className="btn btn-sm btn-outline-danger" onClick={() => removeProject(i)}>🗑 Remove</button>
+                    </div>
+                  </div>
                 ))}
               </div>
-            </div>
-          </div>
-        )}
+            )}
 
+            {active === "contact" && (
+              <div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>Email</label>
+                  <input className="form-control" placeholder="you@example.com" style={inputStyle} value={portfolio.email} onChange={e => update("email", e.target.value)} />
+                </div>
+                <div className="mb-3">
+                  <label className="form-label small text-uppercase" style={{ color: "#94a3b8", fontSize: 11 }}>GitHub</label>
+                  <input className="form-control" placeholder="e.g. ahmeddev" style={inputStyle} value={portfolio.github} onChange={e => update("github", e.target.value)} />
+                </div>
+              </div>
+            )}
+
+            {active === "theme" && (
+              <div>
+                <div className="mb-2 small text-muted">Accent color</div>
+                <div className="d-flex gap-2">
+                  {accents.map(a => (
+                    <button key={a.id} onClick={() => update("accent", a.id)}
+                      style={{ width: 40, height: 40, borderRadius: 10, backgroundColor: a.color, border: `2px solid ${portfolio.accent === a.id ? "white" : "transparent"}`, cursor: "pointer" }}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </div>
       </div>
     </div>
   );

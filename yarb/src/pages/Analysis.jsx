@@ -6,9 +6,20 @@ export default function Analysis() {
   const navigate = useNavigate();
 
   if (!githubData) {
-    navigate("/github");
-    return null;
-  }
+  return (
+    <div className="container py-5 text-center">
+      <h5 className="fw-bold mb-3">No GitHub data found</h5>
+      <p className="text-muted mb-4">Please analyze a GitHub profile first to see your analysis.</p>
+      <button
+        className="btn fw-semibold"
+        style={{ backgroundColor: "#7c3aed", color: "white", borderRadius: 10 }}
+        onClick={() => navigate("/github")}
+      >
+        Go to GitHub Analysis
+      </button>
+    </div>
+  );
+}
 
   const { user, repos, totalStars, languages, score } = githubData;
 

@@ -1,222 +1,84 @@
-import { useApp } from "../context/AppContext";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useApp } from "../context/AppContext";
 
-const FONT_MAP = {
-  sans: "'Inter', sans-serif",
-  serif: "Georgia, serif",
-  mono: "'Courier New', monospace",
-};
+const templates = [
+  { id: "minimal", name: "Minimal", tagline: "Editorial · serif · airy whitespace" },
+  { id: "modern", name: "Modern", tagline: "Glassmorphism · gradients · motion" },
+  { id: "dark", name: "Developer Dark", tagline: "Terminal · monospace · neon green" },
+];
 
-export default function Preview() {
-  const { portfolioData } = useApp();
-  const navigate = useNavigate();
-  const { template, about, skills, projects, contact, theme: portfolioTheme } = portfolioData;
-const profileImage = about.image;
-
+function MinimalTemplate({ data }) {
   return (
-    <div style={{ minHeight: "100vh", background: "#000" }}>
-      {/* Top bar */}
-      <div className="d-flex align-items-center justify-content-between px-4 py-2"
-        style={{ background: "#111", borderBottom: "1px solid #222" }}>
-        <div className="d-flex gap-3">
-          {["Minimal", "Modern", "Developer Dark"].map((t, i) => (
-            <span key={i} className="text-secondary" style={{ fontSize: "13px", cursor: "pointer" }}
-              onClick={() => navigate("/builder")}>
-              {t}
-            </span>
-          ))}
+    <div style={{ backgroundColor: "#fff", color: "#111", padding: 48, minHeight: 500, fontFamily: "Georgia, serif" }}>
+      {data.avatar && (
+        <img src={data.avatar} alt={data.name} style={{ width: 96, height: 96, borderRadius: "50%", objectFit: "cover", marginBottom: 24 }} />
+      )}
+      <h1 style={{ fontSize: 40, fontWeight: "bold", marginBottom: 4 }}>{data.name || "Your Name"}</h1>
+      <p style={{ color: "#666", fontSize: 16, marginBottom: 24 }}>{data.title || "Your Title"}</p>
+      <p style={{ color: "#444", lineHeight: 1.8, maxWidth: 600, marginBottom: 32 }}>{data.bio || "Your bio goes here."}</p>
+      {data.skills?.length > 0 && (
+        <div className="mb-4">
+          <h3 style={{ fontSize: 14, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 12 }}>Skills</h3>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {data.skills.map(s => <span key={s} style={{ border: "1px solid #ddd", borderRadius: 4, padding: "4px 12px", fontSize: 13 }}>{s}</span>)}
+          </div>
         </div>
-        <button onClick={() => navigate("/builder")} className="btn btn-sm text-secondary"
-          style={{ fontSize: "12px" }}>
-          ← Back to Builder
-        </button>
-      </div>
-
-      {/* Preview Frame */}
-      <div className="mx-auto" style={{ maxWidth: "800px", padding: "32px 16px" }}>
-        {template === "minimal" && <MinimalTemplate about={about} skills={skills} projects={projects} contact={contact} theme={portfolioTheme} profileImage={profileImage} />}
-        {template === "modern" && <ModernTemplate about={about} skills={skills} projects={projects} contact={contact} theme={portfolioTheme} profileImage={profileImage} />}
-        {template === "dark" && <DarkTemplate about={about} skills={skills} projects={projects} contact={contact} theme={portfolioTheme} profileImage={profileImage} />}
-      </div>
-    </div>
-  );
-}
-
-// ─── Minimal Template ───────────────────────────────────────────
-function MinimalTemplate({ about, skills, projects, contact, theme, profileImage }) {
-  const isDark = theme?.darkMode;
-  const primary = theme?.primaryColor || "#6c63ff";
-  const fontFamily = FONT_MAP[theme?.fontStyle] || "Georgia, serif";
-
-  // primaryColor → background, darkMode → text color
-  const bg = primary;
-  const textPrimary = isDark ? "#f2f2f2" : "#1a1a1a";
-  const textSecondary = isDark ? "#ddd" : "#444";
-  const textBody = isDark ? "#ccc" : "#333";
-  const borderColor = isDark ? "#ffffff33" : "#00000022";
-
-  return (
-    <div style={{ background: bg, minHeight: "100vh", padding: "48px 64px", fontFamily }}>
-      {/* Header */}
-      <div className="d-flex justify-content-between align-items-start mb-4">
-        <span style={{ fontSize: "13px", letterSpacing: "2px", color: textSecondary }}>
-          {about.name ? about.name[0] + "." : "Y."}
-        </span>
-        <span style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary }}>PORTFOLIO · 2026</span>
-      </div>
-      <hr style={{ borderColor, marginBottom: "40px" }} />
-
-      {/* About */}
-      {profileImage && (
-        <img src={profileImage} alt={about.name || "Profile"}
-          style={{ width: "96px", height: "96px", borderRadius: "50%", objectFit: "cover", marginBottom: "24px", border: `2px solid ${borderColor}` }} />
       )}
-      <h1 style={{ fontSize: "52px", fontWeight: 400, marginBottom: "8px", color: textPrimary }}>
-        {about.name || "Your Name"}
-      </h1>
-      <p style={{ fontStyle: "italic", color: textSecondary, marginBottom: "16px", fontSize: "16px" }}>
-        {about.title || "Your Title"}
-      </p>
-      <p style={{ color: textBody, marginBottom: "24px", lineHeight: 1.7, fontSize: "15px", wordBreak: "break-word", whiteSpace: "pre-wrap" }}>
-        {about.bio || "Your bio goes here."}
-      </p>
-      {contact.email && (
-        <a href={`mailto:${contact.email}`}
-          style={{ color: textPrimary, fontSize: "14px", textDecoration: "underline" }}>
-          {contact.email}
-        </a>
-      )}
-
-      <hr style={{ borderColor, margin: "40px 0" }} />
-
-      {/* Projects */}
-      {projects.filter(p => p.name).length > 0 && (
-        <div className="mb-5">
-          <p style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary, marginBottom: "24px" }}>SELECTED WORK</p>
-          {projects.filter(p => p.name).map((p, i) => (
-            <div key={i} className="d-flex align-items-baseline gap-4 mb-3">
-              <span style={{ fontSize: "12px", color: textPrimary, fontStyle: "italic", flexShrink: 0 }}>0{i + 1}</span>
-              <div style={{ minWidth: 0 }}>
-                <p style={{ fontSize: "20px", fontWeight: 400, marginBottom: "4px", color: textPrimary }}>{p.name}</p>
-                {p.description && <p style={{ fontSize: "13px", color: textSecondary, wordBreak: "break-word", whiteSpace: "pre-wrap" }}>{p.description}</p>}
-              </div>
+      {data.projects?.length > 0 && (
+        <div>
+          <h3 style={{ fontSize: 14, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 12 }}>Projects</h3>
+          {data.projects.slice(0, 3).map((p, i) => (
+            <div key={i} style={{ borderBottom: "1px solid #eee", paddingBottom: 16, marginBottom: 16 }}>
+              <div style={{ fontWeight: "bold" }}>{p.name}</div>
+              <div style={{ color: "#666", fontSize: 13 }}>{p.description}</div>
             </div>
           ))}
         </div>
       )}
-
-      <hr style={{ borderColor, margin: "40px 0" }} />
-
-      {/* Skills */}
-      {skills.filter(s => s).length > 0 && (
-        <div>
-          <p style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary, marginBottom: "16px" }}>SKILLS</p>
-          <div className="d-flex flex-wrap gap-3">
-            {skills.filter(s => s).map((s, i) => (
-              <span key={i} style={{ fontSize: "14px", color: textBody }}>{s}</span>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
 
-// ─── Modern Template ─────────────────────────────────────────────
-function ModernTemplate({ about, skills, projects, contact, theme, profileImage }) {
-  const isDark = theme?.darkMode ?? true;
-  const primary = theme?.primaryColor || "#6c63ff";
-  const fontFamily = FONT_MAP[theme?.fontStyle] || "Inter, sans-serif";
-
-  // primaryColor → background gradient base, darkMode → text
- const bg = primary;
-  const textPrimary = isDark ? "#fff" : "#1a1a2e";
-  const textSecondary = isDark ? "#aaa" : "#666";
-  const textBody = isDark ? "#bbb" : "#555";
-  const borderColor = isDark ? "#ffffff22" : "#00000014";
-  const cardBg = isDark ? "#ffffff0d" : "#00000007";
-  const cardBorder = isDark ? "#ffffff15" : "#00000012";
-  const badgeBg = isDark ? "#ffffff11" : "#00000008";
-  const badgeBorder = isDark ? "#ffffff22" : "#00000018";
-
+function ModernTemplate({ data }) {
   return (
-    <div style={{ background: bg, minHeight: "100vh", padding: "48px 48px", color: textPrimary, fontFamily }}>
-      {/* Hero */}
-      <div className="mb-5 d-flex align-items-center gap-4 flex-wrap" style={{ paddingBottom: "48px", borderBottom: `1px solid ${borderColor}` }}>
-        {profileImage && (
-          <img src={profileImage} alt={about.name || "Profile"}
-            style={{ width: "120px", height: "120px", borderRadius: "50%", objectFit: "cover", border: `2px solid ${primary}`, flexShrink: 0 }} />
+    <div style={{ background: "linear-gradient(135deg, #0f0c29, #302b63, #24243e)", color: "white", padding: 48, minHeight: 500 }}>
+      <div className="d-flex align-items-center gap-3 mb-3" style={{ flexWrap: "wrap" }}>
+        {data.avatar && (
+          <img src={data.avatar} alt={data.name} style={{ width: 96, height: 96, borderRadius: "50%", objectFit: "cover", border: "2px solid #7c3aed" }} />
         )}
-        <div style={{ minWidth: 0 }}>
-          <div className="d-flex align-items-center gap-2 mb-3">
-            <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: "#4ade80", display: "inline-block" }}></span>
-            <span style={{ fontSize: "13px", color: textSecondary }}>Available for new projects</span>
+        <div>
+          <div style={{ display: "inline-block", background: "rgba(255,255,255,0.1)", borderRadius: 20, padding: "4px 12px", fontSize: 12, marginBottom: 8 }}>
+            ● Available for new projects
           </div>
-          <p style={{ fontSize: "14px", color: textSecondary, marginBottom: "8px" }}>Hi, I'm</p>
-          <h1 style={{ fontSize: "52px", fontWeight: 700, marginBottom: "8px", color: textPrimary }}>
-            {about.name || "Your Name"}
-          </h1>
-          <p style={{ fontSize: "18px", color: primary, marginBottom: "16px" }}>
-            {about.title || "Your Title"}
-          </p>
-          <p style={{ color: textBody, lineHeight: 1.7, marginBottom: "24px", wordBreak: "break-word", whiteSpace: "pre-wrap" }}>
-            {about.bio || "Your bio goes here."}
-          </p>
-          {contact.email && (
-            <a href={`mailto:${contact.email}`}
-              className="btn px-4 py-2"
-              style={{ background: primary, color: "#fff", borderRadius: "24px", fontSize: "14px", textDecoration: "none" }}>
-              ✉ Get in touch
-            </a>
-          )}
+          <p style={{ color: "#94a3b8", marginBottom: 4 }}>Hi, I'm</p>
+          <h1 style={{ fontSize: 40, fontWeight: "bold", marginBottom: 4 }}>{data.name || "Your Name"}</h1>
+          <p style={{ color: "#7c3aed", fontSize: 20 }}>{data.title || "Your Title"}</p>
         </div>
       </div>
-
-      {/* Skills */}
-      {skills.filter(s => s).length > 0 && (
-        <div className="mb-5">
-          <p style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary, marginBottom: "16px" }}>SKILLS</p>
-          <div className="d-flex flex-wrap gap-2">
-            {skills.filter(s => s).map((s, i) => (
-              <span key={i} className="px-3 py-1"
-                style={{ background: badgeBg, border: `1px solid ${badgeBorder}`, borderRadius: "20px", fontSize: "13px", color: textBody }}>
-                {s}
-              </span>
-            ))}
+      <p style={{ color: "#94a3b8", maxWidth: 500, lineHeight: 1.8, marginBottom: 32 }}>{data.bio || "Your bio goes here."}</p>
+      <div style={{ display: "flex", gap: 12, marginBottom: 40 }}>
+        {data.email && <a href={`mailto:${data.email}`} style={{ background: "#7c3aed", color: "white", padding: "10px 24px", borderRadius: 8, textDecoration: "none", fontSize: 14 }}>✉ Get in touch</a>}
+        {data.github && <a href={`https://github.com/${data.github}`} target="_blank" rel="noreferrer" style={{ border: "1px solid #444", color: "white", padding: "10px 24px", borderRadius: 8, textDecoration: "none", fontSize: 14 }}>GitHub</a>}
+      </div>
+      {data.skills?.length > 0 && (
+        <div className="mb-4">
+          <h3 style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, color: "#64748b", marginBottom: 12 }}>Skills</h3>
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+            {data.skills.map(s => <span key={s} style={{ background: "rgba(124,58,237,0.2)", border: "1px solid rgba(124,58,237,0.4)", borderRadius: 6, padding: "4px 12px", fontSize: 13 }}>{s}</span>)}
           </div>
         </div>
       )}
-
-      {/* Projects */}
-      {projects.filter(p => p.name).length > 0 && (
-        <div className="mb-5">
-          <p style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary, marginBottom: "16px" }}>PROJECTS</p>
-          <div className="d-flex flex-column gap-3">
-            {projects.filter(p => p.name).map((p, i) => (
-              <div key={i} className="d-flex justify-content-between align-items-start p-3"
-                style={{ background: cardBg, border: `1px solid ${cardBorder}`, borderRadius: "12px" }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <p style={{ fontWeight: 600, marginBottom: "4px", color: textPrimary }}>{p.name}</p>
-                  {p.description && <p style={{ fontSize: "13px", color: textSecondary, marginBottom: 0, wordBreak: "break-word", whiteSpace: "pre-wrap" }}>{p.description}</p>}
-                  {p.tech && <p style={{ fontSize: "12px", color: primary, marginBottom: 0, marginTop: "4px" }}>{p.tech}</p>}
-                </div>
-                {p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ color: textSecondary, fontSize: "18px", textDecoration: "none", flexShrink: 0, marginLeft: "12px" }}>↗</a>}
+      {data.projects?.length > 0 && (
+        <div>
+          <h3 style={{ fontSize: 12, textTransform: "uppercase", letterSpacing: 2, color: "#64748b", marginBottom: 12 }}>Projects</h3>
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12 }}>
+            {data.projects.slice(0, 4).map((p, i) => (
+              <div key={i} style={{ background: "rgba(255,255,255,0.05)", borderRadius: 10, padding: 16, border: "1px solid rgba(255,255,255,0.1)" }}>
+                <div style={{ fontWeight: "bold", marginBottom: 6 }}>{p.name}</div>
+                <div style={{ color: "#94a3b8", fontSize: 13 }}>{p.description}</div>
               </div>
             ))}
-          </div>
-        </div>
-      )}
-
-      {/* Contact */}
-      {(contact.email || contact.phone || contact.location) && (
-        <div>
-          <p style={{ fontSize: "11px", letterSpacing: "3px", color: textSecondary, marginBottom: "16px" }}>CONTACT</p>
-          <div className="d-flex flex-column gap-2">
-            {contact.email && <p style={{ color: textBody, marginBottom: 0, fontSize: "14px" }}>✉ {contact.email}</p>}
-            {contact.phone && <p style={{ color: textBody, marginBottom: 0, fontSize: "14px" }}>📞 {contact.phone}</p>}
-            {contact.location && <p style={{ color: textBody, marginBottom: 0, fontSize: "14px" }}>📍 {contact.location}</p>}
-            {contact.github && <p style={{ color: textBody, marginBottom: 0, fontSize: "14px" }}>GitHub: {contact.github}</p>}
-            {contact.linkedin && <p style={{ color: textBody, marginBottom: 0, fontSize: "14px" }}>LinkedIn: {contact.linkedin}</p>}
           </div>
         </div>
       )}
@@ -224,108 +86,123 @@ function ModernTemplate({ about, skills, projects, contact, theme, profileImage 
   );
 }
 
-// ─── Developer Dark Template ─────────────────────────────────────
-function DarkTemplate({ about, skills, projects, contact, theme, profileImage }) {
-  const isDark = theme?.darkMode ?? true;
-  const primary = theme?.primaryColor || "#39ff14";
-  const fontFamily = FONT_MAP[theme?.fontStyle] || "monospace";
-
-  // primaryColor → accent color, darkMode → page background
-  const pageBg = primary;
-  const boxBg = isDark ? "#161b22" : "#ffffff";
-  const boxBorder = isDark ? "#30363d" : "#d0d7de";
-  const textPrimary = isDark ? "#c9d1d9" : "#24292f";
-  const textSecondary = isDark ? "#888" : "#6e7781";
-  const promptText = isDark ? "#fff" : "#24292f";
-
+function DarkTemplate({ data }) {
   return (
-    <div style={{ background: pageBg, minHeight: "100vh", padding: "48px", fontFamily, color: textPrimary }}>
-
-      {/* Terminal Box */}
-      <div style={{ background: boxBg, border: `1px solid ${boxBorder}`, borderRadius: "12px", padding: "24px", marginBottom: "32px" }}>
-        <div className="d-flex align-items-center gap-2 mb-4">
-          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ff5f57", display: "inline-block" }}></span>
-          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#ffbd2e", display: "inline-block" }}></span>
-          <span style={{ width: "12px", height: "12px", borderRadius: "50%", background: "#28c840", display: "inline-block" }}></span>
-          <span style={{ marginLeft: "12px", fontSize: "12px", color: textSecondary }}>~/{about.name?.toLowerCase().replace(" ", "") || "you"} — zsh</span>
-        </div>
-
-        <div style={{ fontSize: "14px", lineHeight: 2 }}>
-          <p style={{ marginBottom: 0 }}>
-            <span style={{ color: primary }}>you@portfolio</span>
-            <span style={{ color: promptText }}>:~$ </span>
-            <span>whoami</span>
-          </p>
-          <div className="d-flex align-items-center gap-3">
-            {profileImage && (
-              <img src={profileImage} alt={about.name || "Profile"}
-                style={{ width: "48px", height: "48px", borderRadius: "6px", objectFit: "cover", border: `1px solid ${boxBorder}` }} />
-            )}
-            <p style={{ marginBottom: 0, color: promptText }}>
-              {about.name || "Your Name"}
-              {about.title && <span style={{ color: textSecondary }}> — {about.title}</span>}
-            </p>
-          </div>
-          {about.bio && <>
-            <p style={{ marginBottom: 0 }}>
-              <span style={{ color: primary }}>you@portfolio</span>
-              <span style={{ color: promptText }}>:~$ </span>
-              <span>cat about.md</span>
-            </p>
-            <p style={{ marginBottom: 0, color: promptText, wordBreak: "break-word", whiteSpace: "pre-wrap" }}>{about.bio}</p>
-          </>}
-          {skills.filter(s => s).length > 0 && <>
-            <p style={{ marginBottom: 0 }}>
-              <span style={{ color: primary }}>you@portfolio</span>
-              <span style={{ color: promptText }}>:~$ </span>
-              <span>ls --skills</span>
-            </p>
-            <p style={{ marginBottom: 0, color: primary }}>{skills.filter(s => s).join("  ")}</p>
-          </>}
-          <p style={{ marginBottom: 0 }}>
-            <span style={{ color: primary }}>you@portfolio</span>
-            <span style={{ color: promptText }}>:~$ </span>
-            <span style={{ borderRight: `2px solid ${primary}`, paddingRight: "2px" }}></span>
-          </p>
+    <div style={{ backgroundColor: "#0d1117", color: "#00ff41", padding: 48, minHeight: 500, fontFamily: "monospace" }}>
+      <div className="d-flex align-items-center gap-3 mb-2">
+        {data.avatar && (
+          <img src={data.avatar} alt={data.name} style={{ width: 56, height: 56, borderRadius: 6, objectFit: "cover", border: "1px solid #333" }} />
+        )}
+        <div>
+          <div style={{ color: "#666" }}>$ whoami</div>
+          <div style={{ fontSize: 28, fontWeight: "bold", color: "#00ff41" }}>{data.name || "your_name"}</div>
         </div>
       </div>
+      <div style={{ color: "#58a6ff", marginBottom: 32 }}>{data.title || "// your title"}</div>
+      <div style={{ marginBottom: 32 }}>
+        <div style={{ color: "#666" }}>$ cat bio.txt</div>
+        <div style={{ color: "#e6edf3", lineHeight: 1.8 }}>{data.bio || "Your bio goes here."}</div>
+      </div>
+      {data.skills?.length > 0 && (
+        <div style={{ marginBottom: 32 }}>
+          <div style={{ color: "#666" }}>$ ls --skills</div>
+          <div style={{ color: "#00ff41" }}>{data.skills.join(" · ")}</div>
+        </div>
+      )}
+      {data.projects?.length > 0 && (
+        <div>
+          <div style={{ color: "#666" }}>$ ls projects/</div>
+          {data.projects.slice(0, 4).map((p, i) => (
+            <div key={i} style={{ marginBottom: 12, paddingLeft: 16, borderLeft: "2px solid #00ff41" }}>
+              <div style={{ color: "#58a6ff" }}>{p.name}/</div>
+              <div style={{ color: "#8b949e", fontSize: 13 }}>{p.description}</div>
+            </div>
+          ))}
+        </div>
+      )}
+      <div style={{ marginTop: 32, color: "#666" }}>
+        {data.email && <div>$ contact --email {data.email}</div>}
+        {data.github && <div>$ open github.com/{data.github}</div>}
+      </div>
+    </div>
+  );
+}
 
-      {/* Projects */}
-      {projects.filter(p => p.name).length > 0 && (
-        <div className="mb-4">
-          <p style={{ color: primary, fontSize: "13px", marginBottom: "16px" }}>{">"} ./PROJECTS</p>
-          <div className="d-flex flex-column gap-2">
-            {projects.filter(p => p.name).map((p, i) => (
-              <div key={i} className="d-flex justify-content-between align-items-start px-3 py-2"
-                style={{ background: boxBg, border: `1px solid ${boxBorder}`, borderRadius: "8px" }}>
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <span style={{ color: primary }}>{about.name?.split(" ")[0]?.toLowerCase() || "you"}/</span>
-                  <span style={{ color: promptText }}>{p.name}</span>
-                  {p.tech && <span style={{ color: textSecondary, fontSize: "12px", marginLeft: "12px" }}>{p.tech}</span>}
-                  {p.description && <p style={{ color: textSecondary, fontSize: "12px", marginBottom: 0, marginTop: "4px", wordBreak: "break-word", whiteSpace: "pre-wrap" }}>{p.description}</p>}
-                </div>
-                {p.link && <a href={p.link} target="_blank" rel="noreferrer" style={{ color: textSecondary, textDecoration: "none", flexShrink: 0, marginLeft: "12px" }}>★</a>}
+export default function Preview() {
+  const navigate = useNavigate();
+  const { profile } = useApp();
+  const [activeTemplate, setActiveTemplate] = useState(profile.template || "modern");
+
+  // مفيش githubData هنا خالص — كل الداتا manual من Builder
+  const data = {
+    name: profile.name || "",
+    title: profile.title || "",
+    bio: profile.bio || "",
+    skills: profile.skills
+      ? profile.skills.split(",").map(s => s.trim()).filter(Boolean)
+      : [],
+    email: profile.email || "",
+    github: profile.github || "",
+    avatar: profile.avatar || null,
+    projects: profile.builderProjects || [],
+  };
+
+  return (
+    <div className="container py-4">
+      <div className="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 2, color: "#94a3b8" }}>Live preview · auto-updates</div>
+          <h4 className="fw-bold mb-0">Your portfolio</h4>
+        </div>
+        <button className="btn btn-outline-secondary btn-sm" onClick={() => navigate("/builder")}>
+          Edit content →
+        </button>
+      </div>
+
+      {/* Template Switcher */}
+      <div className="row g-3 mb-4">
+        {templates.map(t => (
+          <div className="col-12 col-md-4" key={t.id}>
+            <div
+              onClick={() => setActiveTemplate(t.id)}
+              style={{ borderRadius: 12, border: `2px solid ${activeTemplate === t.id ? "#7c3aed" : "#333"}`, overflow: "hidden", cursor: "pointer", backgroundColor: "#1a1a2e" }}
+            >
+              <div style={{ height: 100, backgroundColor: t.id === "dark" ? "#0d1117" : t.id === "modern" ? "#0f2027" : "#f8f9fa", display: "flex", alignItems: "center", justifyContent: "center" }}>
+                {t.id === "minimal" && <div style={{ color: "#333", textAlign: "center" }}><div style={{ fontWeight: "bold" }}>{data.name || "Your Name"}</div><div style={{ fontSize: 12, color: "#666" }}>{data.title || "Title"}</div></div>}
+                {t.id === "modern" && <div style={{ color: "white", textAlign: "center" }}><div style={{ fontWeight: "bold" }}>{data.name || "Your Name"}</div><div style={{ fontSize: 12, color: "#7c3aed" }}>{data.title || "Title"}</div></div>}
+                {t.id === "dark" && <div style={{ color: "#00ff41", fontFamily: "monospace", fontSize: 11 }}><div>$ whoami → {data.name || "name"}</div></div>}
               </div>
-            ))}
+              <div className="p-2 d-flex justify-content-between align-items-center">
+                <div>
+                  <div className="fw-semibold small" style={{ color: "white" }}>{t.name}</div>
+                  <div style={{ fontSize: 11, color: "#94a3b8" }}>{t.tagline}</div>
+                </div>
+                {activeTemplate === t.id && <span className="badge" style={{ backgroundColor: "#7c3aed" }}>Active</span>}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Browser Frame */}
+      <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid #333" }}>
+        <div style={{ backgroundColor: "#1a1a2e", padding: "10px 16px", display: "flex", alignItems: "center", gap: 8, borderBottom: "1px solid #333" }}>
+          <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#ef4444", display: "inline-block" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#f59e0b", display: "inline-block" }} />
+          <span style={{ width: 10, height: 10, borderRadius: "50%", backgroundColor: "#10b981", display: "inline-block" }} />
+          <span style={{ marginLeft: 12, fontSize: 12, color: "#64748b", fontFamily: "monospace" }}>
+            portfoliogenie.app/@{data.github || "username"} · {templates.find(t => t.id === activeTemplate)?.name}
+          </span>
+          <div style={{ marginLeft: "auto", display: "flex", gap: 12 }}>
+            {data.email && <a href={`mailto:${data.email}`} style={{ fontSize: 12, color: "#64748b", textDecoration: "none" }}>✉ Email</a>}
+            {data.github && <a href={`https://github.com/${data.github}`} target="_blank" rel="noreferrer" style={{ fontSize: 12, color: "#64748b", textDecoration: "none" }}>GitHub</a>}
           </div>
         </div>
-      )}
 
-      {/* Contact */}
-      {(contact.email || contact.github) && (
-        <div style={{ background: boxBg, border: `1px solid ${boxBorder}`, borderRadius: "8px", padding: "16px" }}>
-          <p style={{ color: textSecondary, fontSize: "12px", marginBottom: "12px" }}>./CONTACT</p>
-          {contact.email && <p style={{ color: textPrimary, fontSize: "14px", marginBottom: "4px" }}>
-            email = <span style={{ color: primary }}>"{contact.email}"</span>
-          </p>}
-          {contact.github && <p style={{ color: textPrimary, fontSize: "14px", marginBottom: "4px" }}>
-            github = <span style={{ color: primary }}>"{contact.github}"</span>
-          </p>}
-          {contact.linkedin && <p style={{ color: textPrimary, fontSize: "14px", marginBottom: 0 }}>
-            linkedin = <span style={{ color: primary }}>"{contact.linkedin}"</span>
-          </p>}
-        </div>
-      )}
+        {activeTemplate === "minimal" && <MinimalTemplate data={data} />}
+        {activeTemplate === "modern" && <ModernTemplate data={data} />}
+        {activeTemplate === "dark" && <DarkTemplate data={data} />}
+      </div>
     </div>
   );
 }

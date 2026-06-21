@@ -10,6 +10,7 @@ import AITool from "./pages/AITool";
 import Builder from "./pages/Builder";
 import Preview from "./pages/Preview";
 import GitHub from "./pages/GitHub";
+import Profile from "./pages/Profile";
 
 function Layout({ children }) {
   return (
@@ -36,6 +37,7 @@ function App() {
             <Route path="/builder" element={<Builder />} />
             <Route path="/preview" element={<Preview />} />
             <Route path="/github" element={<GitHub />} />
+            <Route path="/profile" element={<Profile />} />
           </Routes>
         </Layout>
       </BrowserRouter>

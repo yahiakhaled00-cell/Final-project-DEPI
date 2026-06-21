@@ -15,6 +15,8 @@ const authedLinks = [
   { to: "/builder", label: "Portfolio Builder" },
   { to: "/resume", label: "Resume Builder" },
   { to: "/export", label: "Export Center" },
+  { to: "/AITool", label: "AITool" },
+  { to: "/career", label: "Career" }
 ];
 
 export function Navbar() {
