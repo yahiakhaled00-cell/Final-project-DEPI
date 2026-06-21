@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import { AppProvider } from "./context/AppContext";
+import { AppProvider, useApp } from "./context/AppContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
 import Dashboard from "./pages/Dashboard";
@@ -14,9 +14,15 @@ import GitHub from "./pages/GitHub";
 import Profile from "./pages/Profile";
 
 function Layout({ children }) {
+  const { theme } = useApp();
   return (
     <div
-      style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        flexDirection: "column",
+        backgroundColor: theme === "dark" ? "#0d1117" : "#f8f9fa",
+      }}
     >
       <Navbar />
       <main style={{ flex: 1 }}>{children}</main>

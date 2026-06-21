@@ -3,10 +3,23 @@ import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 export default function SignUp() {
-  const { signup } = useApp();
+  const { signup, theme } = useApp();
   const navigate = useNavigate();
-  const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
+  const [form, setForm] = useState({
+    name: "",
+    email: "",
+    password: "",
+    confirm: "",
+  });
   const [error, setError] = useState("");
+
+  const bg = theme === "dark" ? "#0d1117" : "#f8f9fa";
+  const cardBg = theme === "dark" ? "#1a1a2e" : "#ffffff";
+  const cardColor = theme === "dark" ? "white" : "#111";
+  const mutedColor = theme === "dark" ? "#8b949e" : "#6c757d";
+  const borderColor = theme === "dark" ? "#333" : "#dee2e6";
+  const inputBg = theme === "dark" ? "#0f172a" : "#ffffff";
+  const inputColor = theme === "dark" ? "white" : "#111";
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -26,24 +39,42 @@ export default function SignUp() {
       setError("Password must be at least 6 characters.");
       return;
     }
-
-    const result = signup({ name: form.name, email: form.email, password: form.password });
+    const result = signup({
+      name: form.name,
+      email: form.email,
+      password: form.password,
+    });
     if (!result.success) {
       setError(result.message);
       return;
     }
-
     navigate("/github");
   };
 
   return (
-    <div className="min-vh-100 d-flex align-items-center justify-content-center" style={{ backgroundColor: "#f8f9fa" }}>
-      <div className="card shadow-sm p-4" style={{ width: "100%", maxWidth: 440, borderRadius: 16 }}>
-
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center"
+      style={{ backgroundColor: bg }}
+    >
+      <div
+        className="card shadow-sm p-4"
+        style={{
+          width: "100%",
+          maxWidth: 440,
+          borderRadius: 16,
+          backgroundColor: cardBg,
+          color: cardColor,
+          border: `1px solid ${borderColor}`,
+        }}
+      >
         <div className="text-center mb-4">
-          <div className="fw-bold fs-4 mb-1" style={{ color: "#7c3aed" }}>✦ PortfolioGenie</div>
+          <div className="fw-bold fs-4 mb-1" style={{ color: "#7c3aed" }}>
+            ✦ PortfolioGenie
+          </div>
           <h5 className="fw-bold">Create your account</h5>
-          <p className="text-muted small">Start building your portfolio today</p>
+          <p style={{ color: mutedColor }} className="small">
+            Start building your portfolio today
+          </p>
         </div>
 
         {error && <div className="alert alert-danger py-2 small">{error}</div>}
@@ -58,7 +89,12 @@ export default function SignUp() {
               placeholder="John Doe"
               value={form.name}
               onChange={handleChange}
-              style={{ borderRadius: 10 }}
+              style={{
+                borderRadius: 10,
+                backgroundColor: inputBg,
+                color: inputColor,
+                border: `1px solid ${borderColor}`,
+              }}
             />
           </div>
 
@@ -71,7 +107,12 @@ export default function SignUp() {
               placeholder="john@example.com"
               value={form.email}
               onChange={handleChange}
-              style={{ borderRadius: 10 }}
+              style={{
+                borderRadius: 10,
+                backgroundColor: inputBg,
+                color: inputColor,
+                border: `1px solid ${borderColor}`,
+              }}
             />
           </div>
 
@@ -84,12 +125,19 @@ export default function SignUp() {
               placeholder="••••••••"
               value={form.password}
               onChange={handleChange}
-              style={{ borderRadius: 10 }}
+              style={{
+                borderRadius: 10,
+                backgroundColor: inputBg,
+                color: inputColor,
+                border: `1px solid ${borderColor}`,
+              }}
             />
           </div>
 
           <div className="mb-4">
-            <label className="form-label small fw-semibold">Confirm Password</label>
+            <label className="form-label small fw-semibold">
+              Confirm Password
+            </label>
             <input
               type="password"
               name="confirm"
@@ -97,25 +145,41 @@ export default function SignUp() {
               placeholder="••••••••"
               value={form.confirm}
               onChange={handleChange}
-              style={{ borderRadius: 10, borderColor: form.confirm && form.password !== form.confirm ? "#dc3545" : "" }}
+              style={{
+                borderRadius: 10,
+                backgroundColor: inputBg,
+                color: inputColor,
+                border: `1px solid ${form.confirm && form.password !== form.confirm ? "#dc3545" : borderColor}`,
+              }}
             />
             {form.confirm && form.password !== form.confirm && (
-              <div className="text-danger small mt-1">Passwords do not match</div>
+              <div className="text-danger small mt-1">
+                Passwords do not match
+              </div>
             )}
           </div>
 
           <button
             type="submit"
             className="btn w-100 fw-semibold"
-            style={{ backgroundColor: "#7c3aed", color: "white", borderRadius: 10 }}
+            style={{
+              backgroundColor: "#7c3aed",
+              color: "white",
+              borderRadius: 10,
+            }}
           >
             Create Account
           </button>
         </form>
 
-        <p className="text-center text-muted small mt-3 mb-0">
+        <p
+          className="text-center small mt-3 mb-0"
+          style={{ color: mutedColor }}
+        >
           Already have an account?{" "}
-          <Link to="/signin" style={{ color: "#7c3aed" }}>Sign In</Link>
+          <Link to="/signin" style={{ color: "#7c3aed" }}>
+            Sign In
+          </Link>
         </p>
       </div>
     </div>
