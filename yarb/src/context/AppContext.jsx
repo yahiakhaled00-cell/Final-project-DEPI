@@ -21,6 +21,11 @@ export function AppProvider({ children }) {
     }))
   );
 
+  // 👇 جديد: تخزين اليوزرز اللي عملوا Sign Up
+  const [users, setUsers] = useState(
+    () => JSON.parse(localStorage.getItem("users") || "[]")
+  );
+
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark");
   }, [theme]);
@@ -53,12 +58,36 @@ export function AppProvider({ children }) {
     localStorage.setItem("profile", JSON.stringify(data));
   };
 
+  // 👇 جديد: signup و signin
+  const signup = (userData) => {
+  const exists = users.some(u => u.email === userData.email);
+  if (exists) return { success: false, message: "Email already registered." };
+
+  const updatedUsers = [...users, userData];
+  setUsers(updatedUsers);
+  localStorage.setItem("users", JSON.stringify(updatedUsers));
+
+  // تسجيل دخول تلقائي بعد الـ Sign Up
+  login({ name: userData.name, email: userData.email });
+
+  return { success: true };
+};
+
+  const signin = (email, password) => {
+    const found = users.find(u => u.email === email && u.password === password);
+    if (!found) return { success: false, message: "Invalid email or password." };
+
+    login({ name: found.name, email: found.email });
+    return { success: true };
+  };
+
   return (
     <AppContext.Provider value={{
       theme, toggleTheme,
       isAuthenticated, user, login, logout,
       githubData, setGithubData: handleSetGithubData,
       profile, setProfile: handleSetProfile,
+      signup, signin,
     }}>
       {children}
     </AppContext.Provider>

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 export default function SignUp() {
-  const { login } = useApp();
+  const { signup } = useApp();
   const navigate = useNavigate();
   const [form, setForm] = useState({ name: "", email: "", password: "", confirm: "" });
   const [error, setError] = useState("");
@@ -26,8 +26,14 @@ export default function SignUp() {
       setError("Password must be at least 6 characters.");
       return;
     }
-    login({ name: form.name, email: form.email });
-    navigate("/dashboard");
+
+    const result = signup({ name: form.name, email: form.email, password: form.password });
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+
+    navigate("/github");
   };
 
   return (

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { useApp } from "../context/AppContext";
 
 export default function SignIn() {
-  const { login } = useApp();
+  const { signin } = useApp();
   const navigate = useNavigate();
   const [form, setForm] = useState({ email: "", password: "" });
   const [error, setError] = useState("");
@@ -18,8 +18,12 @@ export default function SignIn() {
       setError("Please fill in all fields.");
       return;
     }
-    login({ name: form.email.split("@")[0], email: form.email });
-    navigate("/dashboard");
+    const result = signin(form.email, form.password);
+    if (!result.success) {
+      setError(result.message);
+      return;
+    }
+    navigate("/github");
   };
 
   return (
@@ -81,4 +85,4 @@ export default function SignIn() {
       </div>
     </div>
   );
-}   
+}
