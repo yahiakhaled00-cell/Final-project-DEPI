@@ -24,8 +24,19 @@ export function AppProvider({ children }) {
     setIsAuthenticated(false);
   };
 
+
+const [portfolioData, setPortfolioData] = useState({
+  template: "minimal",
+  about: { name: "", title: "", bio: "" },
+  skills: [],
+  projects: [],
+  contact: { email: "", phone: "", location: "", github: "", linkedin: "" },
+  theme: { primaryColor: "#6c63ff", fontStyle: "sans", darkMode: false },
+  profileImage: null
+});
+
   return (
-    <AppContext.Provider value={{ theme, toggleTheme, isAuthenticated, user, login, logout, githubData, setGithubData }}>
+    <AppContext.Provider value={{ theme, toggleTheme, isAuthenticated, user, login, logout, githubData, setGithubData, portfolioData, setPortfolioData }}>
       {children}
     </AppContext.Provider>
   );
