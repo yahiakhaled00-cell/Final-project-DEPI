@@ -1,7 +1,8 @@
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { FaGithub, FaRocket, FaArrowRight, FaCheck } from "react-icons/fa";
 import { FaGitAlt, FaUserPen, FaChartBar, FaBullseye, FaFileCode, FaPalette } from "react-icons/fa6";
+import { useApp } from "../context/AppContext";
 
 const features = [
   { icon: FaGithub, title: "GitHub Analysis", desc: "Deep insights from your repos, languages, and activity." },
@@ -30,11 +31,9 @@ const stats = [
   { k: "Dev score avg.", v: "78 / 100" },
 ];
 
-// Simple animation hook
 function useInView(threshold = 0.1) {
   const [ref, setRef] = useState(null);
   const [visible, setVisible] = useState(false);
-
   useEffect(() => {
     if (!ref) return;
     const observer = new IntersectionObserver(([e]) => {
@@ -43,28 +42,26 @@ function useInView(threshold = 0.1) {
     observer.observe(ref);
     return () => observer.disconnect();
   }, [ref, threshold]);
-
   return [setRef, visible];
 }
 
 function FadeIn({ children, delay = 0, style = {} }) {
   const [ref, visible] = useInView();
   return (
-    <div
-      ref={ref}
-      style={{
-        opacity: visible ? 1 : 0,
-        transform: visible ? "translateY(0)" : "translateY(24px)",
-        transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
-        ...style,
-      }}
-    >
+    <div ref={ref} style={{
+      opacity: visible ? 1 : 0,
+      transform: visible ? "translateY(0)" : "translateY(24px)",
+      transition: `opacity 0.6s ease ${delay}s, transform 0.6s ease ${delay}s`,
+      ...style,
+    }}>
       {children}
     </div>
   );
 }
 
 export default function Home() {
+  const { isAuthenticated } = useApp();
+  const navigate = useNavigate();
   const [typedText, setTypedText] = useState("");
   const fullText = "professional portfolio";
 
@@ -77,6 +74,15 @@ export default function Home() {
     }, 60);
     return () => clearInterval(interval);
   }, []);
+
+  // أي زرار بيروح لصفحة محمية بيمر من هنا
+  const goProtected = (path) => {
+    if (isAuthenticated) {
+      navigate(path);
+    } else {
+      navigate("/signin");
+    }
+  };
 
   return (
     <div style={{ color: "white" }}>
@@ -104,12 +110,16 @@ export default function Home() {
           </p>
 
           <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap", marginBottom: 24 }}>
-            <Link to="/github" style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "#7c3aed", color: "white", padding: "12px 24px", borderRadius: 12, fontWeight: 600, textDecoration: "none", fontSize: 15 }}>
+            {/* Get Started */}
+            <button onClick={() => goProtected("/github")}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "#7c3aed", color: "white", padding: "12px 24px", borderRadius: 12, fontWeight: 600, border: "none", fontSize: 15, cursor: "pointer" }}>
               Get Started <FaArrowRight />
-            </Link>
-            <Link to="/preview" style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "white", padding: "12px 24px", borderRadius: 12, fontWeight: 500, textDecoration: "none", fontSize: 15, backdropFilter: "blur(10px)" }}>
+            </button>
+            {/* View Demo */}
+            <button onClick={() => goProtected("/preview")}
+              style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "white", padding: "12px 24px", borderRadius: 12, fontWeight: 500, fontSize: 15, backdropFilter: "blur(10px)", cursor: "pointer" }}>
               View Demo
-            </Link>
+            </button>
           </div>
 
           <div style={{ display: "flex", gap: 20, justifyContent: "center", flexWrap: "wrap" }}>
@@ -156,14 +166,12 @@ export default function Home() {
             <p style={{ color: "#94a3b8", maxWidth: 500, margin: "0 auto" }}>Built on top of your real GitHub work — no fluff, no templates that everyone else uses.</p>
           </div>
         </FadeIn>
-
         <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 20 }}>
           {features.map((f, i) => (
             <FadeIn key={f.title} delay={i * 0.08}>
               <div style={{ background: "rgba(15,23,42,0.7)", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 20, padding: 28, transition: "transform 0.2s, border-color 0.2s", cursor: "default" }}
                 onMouseEnter={e => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.borderColor = "rgba(124,58,237,0.4)"; }}
-                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}
-              >
+                onMouseLeave={e => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = "rgba(255,255,255,0.08)"; }}>
                 <div style={{ width: 44, height: 44, background: "linear-gradient(135deg, #7c3aed, #06b6d4)", borderRadius: 12, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: 20, fontSize: 20 }}>
                   <f.icon />
                 </div>
@@ -184,17 +192,18 @@ export default function Home() {
               <h2 style={{ fontSize: 36, fontWeight: 700, marginBottom: 8 }}>Pick a starting point</h2>
               <p style={{ color: "#94a3b8" }}>Hand-crafted, fully responsive.</p>
             </div>
-            <Link to="/builder" style={{ color: "#7c3aed", textDecoration: "none", fontSize: 14, fontWeight: 500 }}>Browse all →</Link>
+            <button onClick={() => goProtected("/builder")}
+              style={{ color: "#7c3aed", background: "none", border: "none", fontSize: 14, fontWeight: 500, cursor: "pointer" }}>
+              Browse all →
+            </button>
           </div>
         </FadeIn>
-
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: 16 }}>
           {templates.map((t, i) => (
             <FadeIn key={t.name} delay={i * 0.1}>
               <div style={{ borderRadius: 16, overflow: "hidden", border: "1px solid rgba(255,255,255,0.08)", transition: "transform 0.2s" }}
                 onMouseEnter={e => e.currentTarget.style.transform = "translateY(-4px)"}
-                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}
-              >
+                onMouseLeave={e => e.currentTarget.style.transform = "translateY(0)"}>
                 <div style={{ height: 140, background: t.bg, display: "flex", alignItems: "center", justifyContent: "center", position: "relative" }}>
                   <div style={{ background: "rgba(0,0,0,0.2)", borderRadius: 12, border: "1px solid rgba(255,255,255,0.15)", padding: 16, backdropFilter: "blur(10px)", minWidth: 120 }}>
                     <div style={{ height: 6, width: "60%", borderRadius: 50, background: "rgba(255,255,255,0.4)", marginBottom: 8 }} />
@@ -220,7 +229,6 @@ export default function Home() {
             <h2 style={{ fontSize: 36, fontWeight: 700 }}>Loved by developers</h2>
           </div>
         </FadeIn>
-
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 16 }}>
           {testimonials.map((t, i) => (
             <FadeIn key={t.name} delay={i * 0.1}>
@@ -256,12 +264,16 @@ export default function Home() {
                 Connect GitHub, pick a template, publish. The whole flow takes less than 10 minutes.
               </p>
               <div style={{ display: "flex", gap: 12, justifyContent: "center", flexWrap: "wrap" }}>
-                <Link to="/github" style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "#7c3aed", color: "white", padding: "12px 28px", borderRadius: 12, fontWeight: 600, textDecoration: "none" }}>
+                {/* Start free */}
+                <button onClick={() => goProtected("/github")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "#7c3aed", color: "white", padding: "12px 28px", borderRadius: 12, fontWeight: 600, border: "none", cursor: "pointer" }}>
                   Start free <FaArrowRight />
-                </Link>
-                <Link to="/dashboard" style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "white", padding: "12px 28px", borderRadius: 12, fontWeight: 500, textDecoration: "none", backdropFilter: "blur(10px)" }}>
+                </button>
+                {/* See dashboard */}
+                <button onClick={() => goProtected("/dashboard")}
+                  style={{ display: "inline-flex", alignItems: "center", gap: 8, backgroundColor: "rgba(255,255,255,0.05)", border: "1px solid rgba(255,255,255,0.15)", color: "white", padding: "12px 28px", borderRadius: 12, fontWeight: 500, backdropFilter: "blur(10px)", cursor: "pointer" }}>
                   See dashboard
-                </Link>
+                </button>
               </div>
             </div>
           </div>

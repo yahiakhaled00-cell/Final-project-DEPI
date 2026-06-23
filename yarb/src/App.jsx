@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AppProvider, useApp } from "./context/AppContext";
 import { Navbar } from "./components/Navbar";
 import { Footer } from "./components/Footer";
+import { ProtectedRoute } from "./components/ProtectedRoute";
 import Dashboard from "./pages/Dashboard";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
@@ -16,6 +17,10 @@ import Skills from "./pages/Skills";
 import Resume from "./pages/Resume";
 import Home from "./pages/Home";
 import Export from "./pages/Export";
+import Terms from "./pages/Terms";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
+import Contact from "./pages/Contact";
+import "./index.css";
 
 function Layout({ children }) {
   const { theme } = useApp();
@@ -34,21 +39,27 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
+            {/* Public */}
             <Route path="/" element={<Home />} />
             <Route path="/home" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
-            <Route path="/analysis" element={<Analysis />} />
-            <Route path="/career" element={<Career />} />
-            <Route path="/aitool" element={<AITool />} />
-            <Route path="/builder" element={<Builder />} />
-            <Route path="/preview" element={<Preview />} />
-            <Route path="/github" element={<GitHub />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/dashboard" element={<Dashboard />} />
-            <Route path="/skills" element={<Skills />} />
-            <Route path="/resume" element={<Resume />} />
-            <Route path="/export" element={<Export />} />
+            <Route path="/terms" element={<Terms />} />
+            <Route path="/privacy" element={<PrivacyPolicy />} />
+            <Route path="/contact" element={<Contact />} />
+
+            {/* Protected */}
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/github" element={<ProtectedRoute><GitHub /></ProtectedRoute>} />
+            <Route path="/analysis" element={<ProtectedRoute><Analysis /></ProtectedRoute>} />
+            <Route path="/builder" element={<ProtectedRoute><Builder /></ProtectedRoute>} />
+            <Route path="/preview" element={<ProtectedRoute><Preview /></ProtectedRoute>} />
+            <Route path="/resume" element={<ProtectedRoute><Resume /></ProtectedRoute>} />
+            <Route path="/export" element={<ProtectedRoute><Export /></ProtectedRoute>} />
+            <Route path="/aitool" element={<ProtectedRoute><AITool /></ProtectedRoute>} />
+            <Route path="/career" element={<ProtectedRoute><Career /></ProtectedRoute>} />
+            <Route path="/skills" element={<ProtectedRoute><Skills /></ProtectedRoute>} />
+            <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
           </Routes>
         </Layout>
       </BrowserRouter>
