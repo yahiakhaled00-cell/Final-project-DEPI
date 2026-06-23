@@ -1,11 +1,12 @@
+import React from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { useState } from "react";
 import { useApp } from "../context/AppContext";
 
 const publicLinks = [
   { to: "/", label: "Home" },
-  { to: "/features", label: "Features" },
-  { to: "/templates", label: "Templates" },
+  { to: "/#features", label: "Features" },
+  { to: "/#templates", label: "Templates" },
 ];
 
 const authedLinks = [
@@ -15,8 +16,9 @@ const authedLinks = [
   { to: "/builder", label: "Portfolio Builder" },
   { to: "/resume", label: "Resume Builder" },
   { to: "/export", label: "Export Center" },
-  { to: "/AITool", label: "AITool" },
-  { to: "/career", label: "Career" }
+  { to: "/aitool", label: "AITool" },
+  { to: "/career", label: "Career" },
+  { to: "/skills", label: "Skills" },
 ];
 
 export function Navbar() {
@@ -30,6 +32,31 @@ export function Navbar() {
   const handleLogout = () => {
     logout();
     navigate("/");
+  };
+
+  const renderLink = (l) => {
+    if (l.to.includes("#")) {
+      return React.createElement(
+        "a",
+        {
+          href: l.to,
+          className: "nav-link",
+          style: { color: theme === "dark" ? "#e2e8f0" : "#374151", textDecoration: "none" },
+          onClick: () => setMenuOpen(false),
+        },
+        l.label
+      );
+    }
+    return (
+      <Link
+        to={l.to}
+        className={`nav-link ${pathname === l.to ? "active fw-semibold" : ""}`}
+        style={{ color: theme === "dark" ? "#e2e8f0" : "#374151" }}
+        onClick={() => setMenuOpen(false)}
+      >
+        {l.label}
+      </Link>
+    );
   };
 
   return (
@@ -51,13 +78,7 @@ export function Navbar() {
           <ul className="navbar-nav mx-auto mb-2 mb-lg-0">
             {links.map((l) => (
               <li className="nav-item" key={l.to}>
-                <Link
-                  to={l.to}
-                  className={`nav-link ${pathname === l.to ? "active fw-semibold" : ""}`}
-                  style={{ color: theme === "dark" ? "#e2e8f0" : "#374151" }}
-                >
-                  {l.label}
-                </Link>
+                {renderLink(l)}
               </li>
             ))}
           </ul>

@@ -12,18 +12,15 @@ import Builder from "./pages/Builder";
 import Preview from "./pages/Preview";
 import GitHub from "./pages/GitHub";
 import Profile from "./pages/Profile";
+import Skills from "./pages/Skills";
+import Resume from "./pages/Resume";
+import Home from "./pages/Home";
+import Export from "./pages/Export";
 
 function Layout({ children }) {
   const { theme } = useApp();
   return (
-    <div
-      style={{
-        minHeight: "100vh",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: theme === "dark" ? "#0d1117" : "#f8f9fa",
-      }}
-    >
+    <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column", backgroundColor: theme === "dark" ? "#0d1117" : "#f8f9fa" }}>
       <Navbar />
       <main style={{ flex: 1 }}>{children}</main>
       <Footer />
@@ -37,7 +34,8 @@ function App() {
       <BrowserRouter>
         <Layout>
           <Routes>
-            <Route path="/" element={<SignIn />} />
+            <Route path="/" element={<Home />} />
+            <Route path="/home" element={<Home />} />
             <Route path="/signin" element={<SignIn />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/analysis" element={<Analysis />} />
@@ -48,6 +46,9 @@ function App() {
             <Route path="/github" element={<GitHub />} />
             <Route path="/profile" element={<Profile />} />
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/skills" element={<Skills />} />
+            <Route path="/resume" element={<Resume />} />
+            <Route path="/export" element={<Export />} />
           </Routes>
         </Layout>
       </BrowserRouter>
