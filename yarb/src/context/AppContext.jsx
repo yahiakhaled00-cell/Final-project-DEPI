@@ -21,7 +21,11 @@ export function AppProvider({ children }) {
     }))
   );
 
+<<<<<<< HEAD
   
+=======
+  //  جديد: تخزين اليوزرز اللي عملوا Sign Up
+>>>>>>> 6328fed39444e17efd971311bbfff558c6070c9c
   const [users, setUsers] = useState(
     () => JSON.parse(localStorage.getItem("users") || "[]")
   );
@@ -58,7 +62,11 @@ export function AppProvider({ children }) {
     localStorage.setItem("profile", JSON.stringify(data));
   };
 
+<<<<<<< HEAD
   
+=======
+  // جديد: signup و signin
+>>>>>>> 6328fed39444e17efd971311bbfff558c6070c9c
   const signup = (userData) => {
   const exists = users.some(u => u.email === userData.email);
   if (exists) return { success: false, message: "Email already registered." };

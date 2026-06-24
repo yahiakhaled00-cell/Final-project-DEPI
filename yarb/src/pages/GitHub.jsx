@@ -32,7 +32,7 @@ export default function GitHub() {
       const score = Math.min(
         100,
         Math.floor(
-          user.followers * 0.3 + totalStars * 0.3 + repos.length * 0.4,
+          user.followers * 0.3 + totalStars * 0.5 + repos.length * 2,
         ),
       );
 
