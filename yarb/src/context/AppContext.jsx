@@ -21,7 +21,7 @@ export function AppProvider({ children }) {
     }))
   );
 
-  // 👇 جديد: تخزين اليوزرز اللي عملوا Sign Up
+  //  جديد: تخزين اليوزرز اللي عملوا Sign Up
   const [users, setUsers] = useState(
     () => JSON.parse(localStorage.getItem("users") || "[]")
   );
@@ -58,7 +58,7 @@ export function AppProvider({ children }) {
     localStorage.setItem("profile", JSON.stringify(data));
   };
 
-  // 👇 جديد: signup و signin
+  // جديد: signup و signin
   const signup = (userData) => {
   const exists = users.some(u => u.email === userData.email);
   if (exists) return { success: false, message: "Email already registered." };
