@@ -70,7 +70,7 @@ export function Footer() {
             </ul>
           </div>
 
-          {/* Tools - يظهر بس لو مسجل دخول */}
+          {}
           {isAuthenticated && (
             <div className="col-6 col-md">
               <div className="fw-semibold mb-3 text-white">Tools</div>

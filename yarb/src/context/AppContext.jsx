@@ -22,10 +22,6 @@ export function AppProvider({ children }) {
   );
 
 
-  
-
-  
-
   const [users, setUsers] = useState(
     () => JSON.parse(localStorage.getItem("users") || "[]")
   );

@@ -273,19 +273,7 @@ export default function Builder() {
                 </div>
               )}
 
-              {/* Theme */}
-              {active === "theme" && (
-                <div>
-                  <div className="small mb-2" style={{ color: mutedColor }}>Accent color</div>
-                  <div className="d-flex gap-2">
-                    {accents.map((a) => (
-                      <button key={a.id} onClick={() => update("accent", a.id)}
-                        className="rounded-3 border-0"
-                        style={{ width: 40, height: 40, backgroundColor: a.color, border: `2px solid ${portfolio.accent === a.id ? "white" : "transparent"}`, cursor: "pointer" }} />
-                    ))}
-                  </div>
-                </div>
-              )}
+             
 
             </div>
           </div>

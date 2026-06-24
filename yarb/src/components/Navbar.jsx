@@ -63,7 +63,7 @@ export function Navbar() {
     <nav className="navbar navbar-expand-lg sticky-top shadow-sm" style={{ backgroundColor: theme === "dark" ? "#1a1a2e" : "#ffffff" }}>
       <div className="container">
         <Link className="navbar-brand fw-bold" to="/" style={{ color: "#7c3aed" }}>
-          ✦ PortfolioGenie
+           GitMe
         </Link>
 
         <button
