@@ -75,7 +75,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, []);
 
-  // أي زرار بيروح لصفحة محمية بيمر من هنا
+  
   const goProtected = (path) => {
     if (isAuthenticated) {
       navigate(path);

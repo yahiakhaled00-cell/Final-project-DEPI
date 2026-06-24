@@ -19,7 +19,7 @@ export default function Skills() {
 
   const { repos, languages } = githubData;
 
-  // حساب عدد الـ repos لكل language
+  
   const langCount = {};
   repos.forEach(r => {
     if (r.language) {
