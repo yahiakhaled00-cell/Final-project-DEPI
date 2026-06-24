@@ -14,7 +14,6 @@ const sections = [
   { id: "skills", label: "Skills", icon: "🔧" },
   { id: "projects", label: "Projects", icon: "📁" },
   { id: "contact", label: "Contact", icon: "✉️" },
-  { id: "theme", label: "Theme", icon: "🎨" },
 ];
 
 const accents = [
