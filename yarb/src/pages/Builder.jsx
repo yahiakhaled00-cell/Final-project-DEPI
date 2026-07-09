@@ -16,21 +16,12 @@ const sections = [
   { id: "contact", label: "Contact", icon: "✉️" },
 ];
 
-const accents = [
-  { id: "violet", color: "#7c3aed" },
-  { id: "cyan", color: "#06b6d4" },
-  { id: "emerald", color: "#10b981" },
-  { id: "amber", color: "#f59e0b" },
-  { id: "rose", color: "#f43f5e" },
-];
-
 export default function Builder() {
   const navigate = useNavigate();
-  const { profile, setProfile, theme } = useApp();
+  const { githubData, profile, setProfile, theme } = useApp();
   const [active, setActive] = useState("template");
 
   const isDark = theme === "dark";
-  const bg = isDark ? "#0d1117" : "#f8f9fa";
   const cardBg = isDark ? "#1a1a2e" : "#ffffff";
   const cardColor = isDark ? "white" : "#111";
   const mutedColor = isDark ? "#94a3b8" : "#6c757d";
@@ -44,31 +35,36 @@ export default function Builder() {
     border: `1px solid ${borderColor}`,
   };
 
-  const portfolio = {
-    name: profile.name || "",
-    title: profile.title || "",
-    bio: profile.bio || "",
-    skills: profile.skills ? profile.skills.split(",").map((s) => s.trim()).filter(Boolean) : [],
-    email: profile.email || "",
-    github: profile.github || "",
-    phone: profile.phone || "",
-    linkedin: profile.linkedin || "",
-    avatar: profile.avatar || null,
-    template: profile.template || "minimal",
-    accent: profile.accent || "violet",
-    projects: profile.builderProjects || [],
-  };
+  // بياخد من GitHub أوتوماتيك
+  const [portfolio, setPortfolio] = useState({
+    name: githubData?.user?.name || githubData?.user?.login || "",
+    title: profile?.title || "",
+    bio: githubData?.user?.bio || "",
+    skills: githubData?.languages || [],
+    email: githubData?.user?.email || "",
+    github: githubData?.user?.login || "",
+    phone: profile?.phone || "",
+    linkedin: profile?.linkedin || "",
+    avatar: githubData?.user?.avatar_url || null,
+    template: "minimal",
+    projects: githubData?.repos?.slice(0, 6).map(r => ({
+      name: r.name,
+      title: r.name,
+      description: r.description || "",
+      link: r.html_url || "",
+    })) || [],
+  });
 
-  const update = (key, value) => setProfile({ ...profile, [key]: value });
+  const update = (key, value) => setPortfolio(prev => ({ ...prev, [key]: value }));
 
   const updateProject = (i, field, value) => {
     const next = [...portfolio.projects];
     next[i] = { ...next[i], [field]: value };
-    update("builderProjects", next);
+    update("projects", next);
   };
 
-  const addProject = () => update("builderProjects", [...portfolio.projects, { name: "", description: "", title: "", link: "" }]);
-  const removeProject = (i) => update("builderProjects", portfolio.projects.filter((_, idx) => idx !== i));
+  const addProject = () => update("projects", [...portfolio.projects, { name: "", title: "", description: "", link: "" }]);
+  const removeProject = (i) => update("projects", portfolio.projects.filter((_, idx) => idx !== i));
 
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
@@ -79,7 +75,7 @@ export default function Builder() {
   };
 
   return (
-    <div style={{ backgroundColor: bg, minHeight: "100vh", color: cardColor }}>
+    <div style={{ backgroundColor: isDark ? "#0d1117" : "#f8f9fa", minHeight: "100vh", color: cardColor }}>
       <div className="container py-4">
 
         {/* Header */}
@@ -125,13 +121,13 @@ export default function Builder() {
                             style={{ height: 140, backgroundColor: t.id === "dark" ? "#0d1117" : t.id === "modern" ? "#0f2027" : "#f8f9fa" }}>
                             {t.id === "minimal" && (
                               <div className="text-center" style={{ color: "#333" }}>
-                                <div className="fw-bold" style={{ fontSize: 16 }}>{portfolio.name || "Your Name"}</div>
+                                <div className="fw-bold">{portfolio.name || "Your Name"}</div>
                                 <div className="small" style={{ color: "#666" }}>{portfolio.title || "Your Title"}</div>
                               </div>
                             )}
                             {t.id === "modern" && (
                               <div className="text-center text-white">
-                                <div className="fw-bold" style={{ fontSize: 16 }}>{portfolio.name || "Your Name"}</div>
+                                <div className="fw-bold">{portfolio.name || "Your Name"}</div>
                                 <div className="small" style={{ color: "#94a3b8" }}>{portfolio.title || "Your Title"}</div>
                               </div>
                             )}
@@ -140,7 +136,7 @@ export default function Builder() {
                                 <div>$ whoami</div>
                                 <div>{portfolio.name || "Your Name"}</div>
                                 <div>$ ls --skills</div>
-                                <div>{portfolio.skills.slice(0, 3).join(" · ") || "your skills"}</div>
+                                <div>{Array.isArray(portfolio.skills) ? portfolio.skills.slice(0, 3).join(" · ") : portfolio.skills || "your skills"}</div>
                               </div>
                             )}
                           </div>
@@ -165,11 +161,12 @@ export default function Builder() {
                 <div>
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Profile Photo</label>
                   <div className="d-flex align-items-center gap-3 mb-3">
-                    <div className="d-flex align-items-center justify-content-center flex-shrink-0"
-                      style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", backgroundColor: "#7c3aed" }}>
+                    <div style={{ width: 64, height: 64, borderRadius: "50%", overflow: "hidden", backgroundColor: "#7c3aed", flexShrink: 0 }}>
                       {portfolio.avatar
                         ? <img src={portfolio.avatar} alt="avatar" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
-                        : <span className="text-white" style={{ fontSize: 22 }}>{portfolio.name ? portfolio.name[0].toUpperCase() : "?"}</span>
+                        : <div style={{ width: "100%", height: "100%", display: "flex", alignItems: "center", justifyContent: "center", color: "white", fontSize: 22 }}>
+                            {portfolio.name ? portfolio.name[0].toUpperCase() : "?"}
+                          </div>
                       }
                     </div>
                     <label className="btn btn-sm btn-outline-secondary mb-0" style={{ cursor: "pointer" }}>
@@ -185,16 +182,13 @@ export default function Builder() {
                   </div>
 
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Name</label>
-                  <input className="form-control mb-3" placeholder="e.g. Ahmed Mohamed" style={inputStyle}
-                    value={portfolio.name} onChange={(e) => update("name", e.target.value)} />
+                  <input className="form-control mb-3" style={inputStyle} value={portfolio.name} onChange={(e) => update("name", e.target.value)} />
 
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Title</label>
-                  <input className="form-control mb-3" placeholder="e.g. Full Stack Developer" style={inputStyle}
-                    value={portfolio.title} onChange={(e) => update("title", e.target.value)} />
+                  <input className="form-control mb-3" placeholder="e.g. Full Stack Developer" style={inputStyle} value={portfolio.title} onChange={(e) => update("title", e.target.value)} />
 
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Bio</label>
-                  <textarea className="form-control" rows={5} placeholder="Write a short bio about yourself..." style={inputStyle}
-                    value={portfolio.bio} onChange={(e) => update("bio", e.target.value)} />
+                  <textarea className="form-control" rows={5} style={inputStyle} value={portfolio.bio} onChange={(e) => update("bio", e.target.value)} />
                 </div>
               )}
 
@@ -202,10 +196,12 @@ export default function Builder() {
               {active === "skills" && (
                 <div>
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Skills (comma separated)</label>
-                  <input className="form-control mb-3" placeholder="React, Node.js, Python..." style={inputStyle}
-                    value={portfolio.skills.join(", ")} onChange={(e) => update("skills", e.target.value)} />
+                  <input className="form-control mb-3" style={inputStyle}
+                    value={Array.isArray(portfolio.skills) ? portfolio.skills.join(", ") : portfolio.skills}
+                    onChange={(e) => update("skills", e.target.value.split(",").map(s => s.trim()).filter(Boolean))}
+                  />
                   <div className="d-flex flex-wrap gap-2">
-                    {portfolio.skills.map((s) => (
+                    {(Array.isArray(portfolio.skills) ? portfolio.skills : portfolio.skills?.split(",").map(s => s.trim()).filter(Boolean) || []).map((s) => (
                       <span key={s} className="badge px-3 py-2 rounded-3"
                         style={{ backgroundColor: isDark ? "#1e293b" : "#e2e8f0", color: isDark ? "#e2e8f0" : "#374151" }}>
                         {s}
@@ -219,29 +215,22 @@ export default function Builder() {
               {active === "projects" && (
                 <div>
                   <div className="d-flex justify-content-between align-items-center mb-3">
-                    <span className="small" style={{ color: mutedColor }}>Your projects</span>
+                    <span className="small" style={{ color: mutedColor }}>Your projects from GitHub</span>
                     <button className="btn btn-sm btn-outline-secondary" onClick={addProject}>+ Add Project</button>
                   </div>
                   {portfolio.projects.length === 0 && (
-                    <p className="small" style={{ color: mutedColor }}>No projects yet. Click "+ Add Project" to add one.</p>
+                    <p className="small" style={{ color: mutedColor }}>No projects. Connect GitHub first or add manually.</p>
                   )}
                   {portfolio.projects.map((p, i) => (
                     <div key={i} className="p-3 mb-3 rounded-3" style={{ border: `1px solid ${borderColor}` }}>
                       <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Project Name</label>
-                      <input className="form-control mb-2" placeholder="e.g. Portfolio Website" style={inputStyle}
-                        value={p.name} onChange={(e) => updateProject(i, "name", e.target.value)} />
-
-                      <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Project Title</label>
-                      <input className="form-control mb-2" placeholder="e.g. My Portfolio" style={inputStyle}
-                        value={p.title || ""} onChange={(e) => updateProject(i, "title", e.target.value)} />
+                      <input className="form-control mb-2" style={inputStyle} value={p.name} onChange={(e) => updateProject(i, "name", e.target.value)} />
 
                       <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Description</label>
-                      <textarea className="form-control mb-2" rows={2} placeholder="What does this project do?" style={inputStyle}
-                        value={p.description} onChange={(e) => updateProject(i, "description", e.target.value)} />
+                      <textarea className="form-control mb-2" rows={2} style={inputStyle} value={p.description} onChange={(e) => updateProject(i, "description", e.target.value)} />
 
                       <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Project Link</label>
-                      <input className="form-control mb-2" placeholder="https://github.com/..." style={inputStyle}
-                        value={p.link || ""} onChange={(e) => updateProject(i, "link", e.target.value)} />
+                      <input className="form-control mb-2" placeholder="https://github.com/..." style={inputStyle} value={p.link || ""} onChange={(e) => updateProject(i, "link", e.target.value)} />
 
                       <div className="text-end">
                         <button className="btn btn-sm btn-outline-danger" onClick={() => removeProject(i)}>🗑 Remove</button>
@@ -255,24 +244,18 @@ export default function Builder() {
               {active === "contact" && (
                 <div>
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Email</label>
-                  <input className="form-control mb-3" placeholder="you@example.com" style={inputStyle}
-                    value={portfolio.email} onChange={(e) => update("email", e.target.value)} />
+                  <input className="form-control mb-3" style={inputStyle} value={portfolio.email} onChange={(e) => update("email", e.target.value)} />
 
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>GitHub</label>
-                  <input className="form-control mb-3" placeholder="e.g. ahmeddev" style={inputStyle}
-                    value={portfolio.github} onChange={(e) => update("github", e.target.value)} />
+                  <input className="form-control mb-3" style={inputStyle} value={portfolio.github} onChange={(e) => update("github", e.target.value)} />
 
-                  <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Phone Number</label>
-                  <input className="form-control mb-3" placeholder="+20 1XX XXX XXXX" style={inputStyle}
-                    value={portfolio.phone} onChange={(e) => update("phone", e.target.value)} />
+                  <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>Phone</label>
+                  <input className="form-control mb-3" placeholder="+20 1XX XXX XXXX" style={inputStyle} value={portfolio.phone} onChange={(e) => update("phone", e.target.value)} />
 
                   <label className="form-label small text-uppercase" style={{ color: mutedColor, fontSize: 11 }}>LinkedIn</label>
-                  <input className="form-control" placeholder="https://linkedin.com/in/..." style={inputStyle}
-                    value={portfolio.linkedin} onChange={(e) => update("linkedin", e.target.value)} />
+                  <input className="form-control" placeholder="https://linkedin.com/in/..." style={inputStyle} value={portfolio.linkedin} onChange={(e) => update("linkedin", e.target.value)} />
                 </div>
               )}
-
-             
 
             </div>
           </div>

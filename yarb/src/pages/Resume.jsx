@@ -2,20 +2,26 @@ import { useState } from "react";
 import { useApp } from "../context/AppContext";
 
 export default function Resume() {
-  const { profile } = useApp();
+  const { githubData } = useApp();
 
   const [form, setForm] = useState({
-    name: profile?.name || "",
-    title: profile?.title || "",
-    email: profile?.email || "",
-    phone: profile?.phone || "",
-    location: profile?.location || "",
-    skills: profile?.skills || "",
+    name: githubData?.user?.name || githubData?.user?.login || "",
+    title: "",
+    email: githubData?.user?.email || "",
+    phone: "",
+    location: githubData?.user?.location || "",
+    skills: githubData?.languages?.join(", ") || "",
   });
 
-  const [experience, setExperience] = useState(profile?.experience || []);
-  const [education, setEducation] = useState(profile?.education || []);
-  const [projects, setProjects] = useState([]);
+  const [experience, setExperience] = useState([]);
+  const [education, setEducation] = useState([]);
+  const [projects, setProjects] = useState(
+    githubData?.repos?.slice(0, 4).map(r => ({
+      name: r.name,
+      year: new Date(r.created_at).getFullYear().toString(),
+      desc: r.description || "",
+    })) || []
+  );
 
   const handleChange = (e) => setForm({ ...form, [e.target.name]: e.target.value });
 
@@ -214,7 +220,6 @@ ${education.map(e => `${e.degree} — ${e.school} · ${e.from}-${e.to}\n${e.desc
           <div style={{ position: "sticky", top: 80 }}>
             <div style={{ backgroundColor: "white", borderRadius: 16, padding: 40, color: "#111", minHeight: 500 }}>
 
-              {/* Header */}
               <h2 style={{ fontWeight: "bold", marginBottom: 4 }}>{form.name || "Your Name"}</h2>
               <p style={{ color: "#555", marginBottom: 4 }}>{form.title || "Your Title"}</p>
               <p style={{ color: "#888", fontSize: 13, marginBottom: 20 }}>
@@ -222,7 +227,6 @@ ${education.map(e => `${e.degree} — ${e.school} · ${e.from}-${e.to}\n${e.desc
               </p>
               <hr style={{ borderColor: "#eee" }} />
 
-              {/* Skills */}
               {skills.length > 0 && (
                 <div className="mb-4">
                   <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 10 }}>Skills</div>
@@ -234,7 +238,6 @@ ${education.map(e => `${e.degree} — ${e.school} · ${e.from}-${e.to}\n${e.desc
                 </div>
               )}
 
-              {/* Experience */}
               {experience.length > 0 && (
                 <div className="mb-4">
                   <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 10 }}>Experience</div>
@@ -250,7 +253,6 @@ ${education.map(e => `${e.degree} — ${e.school} · ${e.from}-${e.to}\n${e.desc
                 </div>
               )}
 
-              {/* Projects */}
               {projects.length > 0 && (
                 <div className="mb-4">
                   <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 10 }}>Projects</div>
@@ -266,7 +268,6 @@ ${education.map(e => `${e.degree} — ${e.school} · ${e.from}-${e.to}\n${e.desc
                 </div>
               )}
 
-              {/* Education */}
               {education.length > 0 && (
                 <div className="mb-4">
                   <div style={{ fontSize: 11, textTransform: "uppercase", letterSpacing: 2, color: "#999", marginBottom: 10 }}>Education</div>

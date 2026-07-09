@@ -1,5 +1,8 @@
 import { useApp } from "../context/AppContext";
 import { useNavigate } from "react-router-dom";
+import { useMemo } from "react";
+
+const trending = ["GraphQL", "Docker", "Kubernetes", "Rust", "AWS Lambda", "System Design", "Terraform", "Next.js", "TypeScript", "Redis"];
 
 export default function Skills() {
   const { githubData } = useApp();
@@ -8,7 +11,7 @@ export default function Skills() {
   if (!githubData) {
     return (
       <div className="container py-5 text-center">
-        <h5 className="fw-bold mb-3">No GitHub data found</h5>
+        <h5 className="fw-bold mb-3" style={{ color: "white" }}>No GitHub data found</h5>
         <p className="text-muted mb-4">Please analyze a GitHub profile first.</p>
         <button className="btn fw-semibold" style={{ backgroundColor: "#7c3aed", color: "white", borderRadius: 10 }} onClick={() => navigate("/github")}>
           Go to GitHub Analysis
@@ -17,127 +20,122 @@ export default function Skills() {
     );
   }
 
-  const { repos, languages } = githubData;
+  const current = useMemo(() => {
+    return [...new Set(githubData.languages || [])];
+  }, [githubData.languages]);
 
-  
-  const langCount = {};
-  repos.forEach(r => {
-    if (r.language) {
-      langCount[r.language] = (langCount[r.language] || 0) + 1;
-    }
-  });
+  const recommended = trending.filter(t => !current.map(c => c.toLowerCase()).includes(t.toLowerCase()));
 
-  const maxCount = Math.max(...Object.values(langCount), 1);
-
-  const skillsWithLevel = Object.entries(langCount)
-    .map(([lang, count]) => ({
-      name: lang,
-      level: Math.round((count / maxCount) * 100),
-      count,
-    }))
-    .sort((a, b) => b.level - a.level);
-
-  // تقسيم الـ skills لـ categories
-  const frontendLangs = ["JavaScript", "TypeScript", "HTML", "CSS", "Vue", "React"];
-  const backendLangs = ["Python", "Java", "Go", "Rust", "C++", "C#", "PHP", "Ruby", "C"];
-  const otherLangs = ["Shell", "Dockerfile", "Makefile", "Kotlin", "Swift", "Dart"];
-
-  const frontend = skillsWithLevel.filter(s => frontendLangs.includes(s.name));
-  const backend = skillsWithLevel.filter(s => backendLangs.includes(s.name));
-  const other = skillsWithLevel.filter(s => !frontendLangs.includes(s.name) && !backendLangs.includes(s.name));
-
-  const tools = [...new Set(repos.map(r => r.language).filter(Boolean))];
+  const roadmap = [
+    { phase: "Foundation", weeks: "0-4", topics: recommended.slice(0, 2), progress: 100 },
+    { phase: "Intermediate", weeks: "4-10", topics: recommended.slice(2, 4), progress: 60 },
+    { phase: "Advanced", weeks: "10-20", topics: recommended.slice(4, 6), progress: 15 },
+  ];
 
   const cardStyle = {
-    background: "rgba(15,23,42,.7)",
-    border: "1px solid rgba(255,255,255,.08)",
-    borderRadius: 25,
-    padding: 35,
+    background: "rgba(15,23,42,0.7)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    borderRadius: 20,
+    padding: 28,
     color: "white",
   };
-
-  const SkillBar = ({ skill }) => (
-    <div style={{ marginBottom: 20 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 8 }}>
-        <span>{skill.name}</span>
-        <span style={{ color: "#94a3b8" }}>{skill.level}%</span>
-      </div>
-      <div style={{ height: 8, background: "#1e293b", borderRadius: 50, overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${skill.level}%`, background: "linear-gradient(to right, #3b82f6, #8b5cf6)", borderRadius: 50, transition: "width 1s ease" }} />
-      </div>
-    </div>
-  );
 
   return (
     <div style={{ padding: "60px 8%" }}>
 
       {/* Header */}
-      <div className="text-center mb-5">
-        <span className="badge mb-2" style={{ backgroundColor: "#1e293b", color: "#94a3b8", padding: "6px 16px", borderRadius: 50 }}>
-          Skills Overview
-        </span>
-        <h2 className="fw-bold mt-2" style={{ color: "white" }}>Skills & Technologies</h2>
-        <p style={{ color: "#94a3b8" }}>
-          Based on <strong style={{ color: "#7c3aed" }}>@{githubData.user.login}</strong>'s GitHub activity across {repos.length} repositories.
-        </p>
+      <div className="mb-4">
+        <h2 className="fw-bold mb-1" style={{ color: "white" }}>Skill gap analysis</h2>
+        <p style={{ color: "#94a3b8" }}>What you have, what to learn, and how to get there.</p>
       </div>
 
-      {/* Stats */}
-      <div className="row g-3 mb-5 text-center">
-        {[
-          { value: languages?.length || 0, label: "Languages" },
-          { value: repos.length, label: "Repositories" },
-          { value: repos.reduce((s, r) => s + r.stargazers_count, 0), label: "Total Stars" },
-        ].map(s => (
-          <div className="col-4" key={s.label}>
-            <div style={{ ...cardStyle, padding: 24 }}>
-              <h3 className="fw-bold mb-1" style={{ color: "#7c3aed" }}>{s.value}</h3>
-              <p className="mb-0" style={{ color: "#94a3b8", fontSize: 13 }}>{s.label}</p>
+      {/* Current + Recommended */}
+      <div className="row g-4 mb-4">
+        <div className="col-12 col-md-6">
+          <div style={cardStyle}>
+            <div className="fw-semibold mb-3 d-flex align-items-center gap-2">
+              <span style={{ color: "#10b981" }}>✓</span> Current skills
             </div>
-          </div>
-        ))}
-      </div>
-
-      {/* Skills Grid */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: 30, marginBottom: 30 }}>
-
-        {/* Frontend */}
-        {frontend.length > 0 && (
-          <div style={cardStyle}>
-            <h3 className="fw-bold mb-4">🎨 Frontend</h3>
-            {frontend.map(s => <SkillBar key={s.name} skill={s} />)}
-          </div>
-        )}
-
-        {/* Backend */}
-        {backend.length > 0 && (
-          <div style={cardStyle}>
-            <h3 className="fw-bold mb-4">⚙️ Backend</h3>
-            {backend.map(s => <SkillBar key={s.name} skill={s} />)}
-          </div>
-        )}
-
-        {/* Other */}
-        {other.length > 0 && (
-          <div style={cardStyle}>
-            <h3 className="fw-bold mb-4">🔧 Other</h3>
-            {other.map(s => <SkillBar key={s.name} skill={s} />)}
-          </div>
-        )}
-
-        {/* Tools */}
-        <div style={cardStyle}>
-          <h3 className="fw-bold mb-4">🛠 All Languages</h3>
-          <div style={{ display: "flex", flexWrap: "wrap", gap: 12 }}>
-            {tools.map(tool => (
-              <span key={tool} style={{ padding: "10px 16px", borderRadius: 50, background: "#0f172a", border: "1px solid rgba(255,255,255,.08)", color: "white", fontSize: 13 }}>
-                {tool}
-              </span>
-            ))}
+            <div className="d-flex flex-wrap gap-2">
+              {current.length === 0
+                ? <span style={{ color: "#64748b", fontSize: 13 }}>No skills found from GitHub.</span>
+                : current.map(s => (
+                  <span key={s} style={{ borderRadius: 50, border: "1px solid rgba(16,185,129,0.3)", backgroundColor: "rgba(16,185,129,0.1)", padding: "4px 14px", fontSize: 12, color: "#10b981" }}>
+                    {s}
+                  </span>
+                ))
+              }
+            </div>
           </div>
         </div>
 
+        <div className="col-12 col-md-6">
+          <div style={cardStyle}>
+            <div className="fw-semibold mb-3 d-flex align-items-center gap-2">
+              <span style={{ color: "#7c3aed" }}>+</span> Recommended next
+            </div>
+            <div className="d-flex flex-wrap gap-2">
+              {recommended.length === 0
+                ? <span style={{ color: "#64748b", fontSize: 13 }}>You're covering trending stacks well.</span>
+                : recommended.map(s => (
+                  <span key={s} style={{ borderRadius: 50, border: "1px solid rgba(124,58,237,0.3)", backgroundColor: "rgba(124,58,237,0.1)", padding: "4px 14px", fontSize: 12, color: "#a78bfa" }}>
+                    {s}
+                  </span>
+                ))
+              }
+            </div>
+          </div>
+        </div>
       </div>
+
+      {/* Roadmap */}
+      <div>
+        <div className="fw-semibold mb-3 d-flex align-items-center gap-2" style={{ color: "white" }}>
+          📍 Learning roadmap
+        </div>
+        <div className="row g-4">
+          {roadmap.map((r, i) => (
+            <div className="col-12 col-md-4" key={r.phase}>
+              <div style={{
+                ...cardStyle,
+                opacity: 0,
+                animation: `fadeUp 0.5s ease ${i * 0.1}s forwards`,
+              }}>
+                <div className="d-flex justify-content-between align-items-start mb-3">
+                  <div>
+                    <div style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.14em", color: "#64748b", marginBottom: 4 }}>Phase {i + 1}</div>
+                    <div className="fw-semibold">{r.phase}</div>
+                  </div>
+                  <span style={{ fontSize: 12, color: "#64748b" }}>{r.weeks}w</span>
+                </div>
+
+                <div style={{ height: 6, backgroundColor: "#1e293b", borderRadius: 50, overflow: "hidden", marginBottom: 6 }}>
+                  <div style={{ height: "100%", width: `${r.progress}%`, background: "linear-gradient(to right, #7c3aed, #06b6d4)", borderRadius: 50 }} />
+                </div>
+                <div style={{ fontSize: 12, color: "#64748b", marginBottom: 16 }}>{r.progress}% complete</div>
+
+                <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
+                  {r.topics.length === 0
+                    ? <li style={{ color: "#64748b", fontSize: 12 }}>Nothing left in this phase.</li>
+                    : r.topics.map(t => (
+                      <li key={t} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 14, color: "#e2e8f0", marginBottom: 8 }}>
+                        <span style={{ color: "#94a3b8", fontSize: 12 }}>📖</span> {t}
+                      </li>
+                    ))
+                  }
+                </ul>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <style>{`
+        @keyframes fadeUp {
+          from { opacity: 0; transform: translateY(12px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+      `}</style>
     </div>
   );
 }
