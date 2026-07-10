@@ -103,7 +103,7 @@ export function Navbar() {
                   {(user?.name ?? "U").slice(0, 1).toUpperCase()} {user?.name}
                 </button>
                 <ul className="dropdown-menu dropdown-menu-end">
-                  <li><Link className="dropdown-item" to="/profile">Profile</Link></li>
+                  {/* <li><Link className="dropdown-item" to="/profile">Profile</Link></li> */}
                   <li><Link className="dropdown-item" to="/dashboard">Dashboard</Link></li>
                   <li><hr className="dropdown-divider" /></li>
                   <li><button className="dropdown-item text-danger" onClick={handleLogout}>Logout</button></li>

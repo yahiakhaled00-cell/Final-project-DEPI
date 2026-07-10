@@ -35,7 +35,6 @@ export default function Builder() {
     border: `1px solid ${borderColor}`,
   };
 
-  // بياخد من GitHub أوتوماتيك
   const [portfolio, setPortfolio] = useState({
     name: githubData?.user?.name || githubData?.user?.login || "",
     title: profile?.title || "",
@@ -55,7 +54,17 @@ export default function Builder() {
     })) || [],
   });
 
-  const update = (key, value) => setPortfolio(prev => ({ ...prev, [key]: value }));
+  const update = (key, value) => {
+    setPortfolio(prev => {
+      const next = { ...prev, [key]: value };
+      setProfile({
+        ...next,
+        skills: Array.isArray(next.skills) ? next.skills.join(", ") : next.skills,
+        builderProjects: next.projects,
+      });
+      return next;
+    });
+  };
 
   const updateProject = (i, field, value) => {
     const next = [...portfolio.projects];

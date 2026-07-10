@@ -18,7 +18,7 @@ export function Footer() {
 
   const accountItems = isAuthenticated
     ? [
-        { label: "Profile", to: "/profile" },
+        // { label: "Profile", to: "/profile" },
         { label: "Dashboard", to: "/dashboard" },
       ]
     : [
